@@ -1,0 +1,12 @@
+.project
+.idea
+*.iml
+*.tmp
+*.memprof
+*.pprof
+*.exe
+pkg
+bin
+routers
+log
+pid
