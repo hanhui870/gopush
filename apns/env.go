@@ -12,15 +12,15 @@ import (
 )
 
 // This basic discovery service bootstrap env info
-type envInfo struct {
+type EnvInfo struct {
 	cluster.BaseInfo
 
 	CertPath     string
 	CertPassword string
 }
 
-func NewEnvInfo(iniobj *ini.File, c *cli.Context) *envInfo {
-	env := new(envInfo)
+func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
+	env := new(EnvInfo)
 
 	sec := iniobj.Section(CONFIG_SECTION)
 	env.Service = sec.Key("service").String()

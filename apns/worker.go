@@ -55,7 +55,7 @@ type WorkerResponse struct {
 }
 
 // create new worker
-func NewWorker(env *envInfo) (*Worker, error) {
+func NewWorker(env *EnvInfo) (*Worker, error) {
 	cert, err := GetCerts(env.CertPath, env.CertPassword)
 	if err != nil {
 		return nil, err

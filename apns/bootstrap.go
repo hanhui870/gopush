@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	env *envInfo
+	env *EnvInfo
 )
 
 func Bootstrap(c *cli.Context) {
