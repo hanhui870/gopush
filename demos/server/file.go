@@ -15,7 +15,8 @@ func main() {
 
 	http.Handle("/form", &uploadFormHandle{})
 
-	http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
+	//if /bar/指定, /bar自动301到/bar/,也可以两个都指定
+	http.HandleFunc("/bar/", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		r.ParseMultipartForm(16 * 1024 * 1024)
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path), r)
