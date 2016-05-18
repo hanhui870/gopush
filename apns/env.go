@@ -9,6 +9,7 @@ import (
 
 	"zooinit/cluster"
 	"zooinit/config"
+	"gopush/lib"
 )
 
 // This basic discovery service bootstrap env info
@@ -52,4 +53,13 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	env.RegisterSignalWatch()
 
 	return env
+}
+
+func (p *EnvInfo) CreateWorker() (lib.Worker, error) {
+	worker, err := NewWorker(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return worker, nil
 }

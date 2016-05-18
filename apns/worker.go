@@ -10,14 +10,8 @@ import (
 
 	apns "github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/certificate"
-)
 
-const (
-	WORKER_STATUS_SPARE = iota
-	WORKER_STATUS_RUNNING
-
-	WORKER_COMMAND_SEND = iota
-	WORKER_COMMAND_STOP
+	"gopush/lib"
 )
 
 type Worker struct {
@@ -29,30 +23,14 @@ type Worker struct {
 	Lock            sync.Mutex
 
 	//push worker poll belong to
-	Pool            *Pool
+	Pool            *lib.Pool
 
 	//need to initialize
-	PushChannel     chan *WorkerRequeset
+	PushChannel     chan *lib.WorkerRequeset
 	//WorkerID
-	ResponseChannel chan *WorkerResponse
+	ResponseChannel chan *lib.WorkerResponse
 }
 
-type WorkerRequeset struct {
-	msg *apns.Notification
-
-	cmd int
-}
-
-//Create a new request
-func NewWorkerRequeset(msg *apns.Notification, cmd int) *WorkerRequeset {
-	return &WorkerRequeset{msg:msg, cmd:cmd}
-}
-
-type WorkerResponse struct {
-	Response *apns.Response
-
-	Error    error
-}
 
 // create new worker
 func NewWorker(env *EnvInfo) (*Worker, error) {
@@ -62,7 +40,7 @@ func NewWorker(env *EnvInfo) (*Worker, error) {
 	}
 
 	client := apns.NewClient(cert).Production()
-	worker := &Worker{Client:client, Status:WORKER_STATUS_SPARE, PushChannel:make(chan *WorkerRequeset), ResponseChannel:make(chan *WorkerResponse)}
+	worker := &Worker{Client:client, Status:lib.WORKER_STATUS_SPARE, PushChannel:make(chan *lib.WorkerRequeset), ResponseChannel:make(chan *lib.WorkerResponse)}
 
 	return worker, nil
 }
@@ -74,28 +52,31 @@ func (p *Worker) Run() {
 		select {
 		// need transfer by copy
 		case request := <-p.PushChannel:
-			if request == nil || request.cmd == WORKER_COMMAND_STOP {
+			if request == nil || request.Cmd == lib.WORKER_COMMAND_STOP {
 				env.GetLogger().Println(p.GetWorkerName() + " receive terminate channel signal, will quit.")
 				break
 			}else {
 				//return response
-				resp, err := p.Push(request.msg)
-				p.ResponseChannel <- &WorkerResponse{Response:resp, Error:err}
+				resp := p.Push(request.Message)
+				p.ResponseChannel <- resp
 			}
 		}
 	}
-
-	//done wait group
-	p.Pool.wg.Done()
 }
 
 // this a goroutine run
-func (p *Worker) Subscribe(list *DeviceQueue, msg *apns.Notification) {
+func (p *Worker) Subscribe(list *lib.DeviceQueue, msg lib.Message) {
 	for {
-		msgLocal := *msg
+		var msgLocal *apns.Notification
+		var ok bool
+		if msgLocal, ok = msg.(*apns.Notification); !ok {
+			// error type
+			return
+		}
+
 		msgLocal.DeviceToken = <-list.Channel
 
-		request := NewWorkerRequeset(&msgLocal, WORKER_COMMAND_SEND)
+		request := lib.NewWorkerRequeset(&msgLocal, lib.WORKER_COMMAND_SEND)
 		p.PushChannel <- request
 
 		//finish
@@ -103,11 +84,17 @@ func (p *Worker) Subscribe(list *DeviceQueue, msg *apns.Notification) {
 	}
 }
 
-func (p *Worker) Push(msgLocal *apns.Notification) (*apns.Response, error) {
+func (p *Worker) Push(msg lib.Message) (*lib.WorkerResponse) {
 	p.Lock.Lock()
 
+	var msgLocal *apns.Notification
+	var ok bool
+	if msgLocal, ok = msg.(*apns.Notification); !ok {
+		return &lib.WorkerResponse{Response:nil, Error:errors.New("Msg is not instance of apns.Notification")}
+	}
+
 	// working now
-	p.Status = WORKER_STATUS_RUNNING
+	p.Status = lib.WORKER_STATUS_RUNNING
 
 	env.GetLogger().Println(p.GetWorkerName() + " #start# to push for DeviceToken: " + msgLocal.DeviceToken)
 	start := time.Now().UnixNano()
@@ -117,7 +104,7 @@ func (p *Worker) Push(msgLocal *apns.Notification) (*apns.Response, error) {
 		errMsg := p.GetWorkerName() + " Error while worker.Push():" + err.Error()
 		env.GetLogger().Println(errMsg)
 		p.Pool.GetFailLogger().Println(p.GetWorkerName() + " " + msgLocal.DeviceToken)
-		return nil, errors.New(errMsg)
+		return &lib.WorkerResponse{Response:nil, Error:errors.New(errMsg)}
 	}
 
 	//in us
@@ -132,13 +119,23 @@ func (p *Worker) Push(msgLocal *apns.Notification) (*apns.Response, error) {
 	}
 
 	p.Lock.Unlock()
-	p.Status = WORKER_STATUS_SPARE
+	p.Status = lib.WORKER_STATUS_SPARE
 
-	return resp, err
+	return &lib.WorkerResponse{Response:resp, Error:err}
 }
 
 func (p *Worker) GetWorkerName() (string) {
 	return "worker_" + strconv.Itoa(p.WorkerID)
+}
+
+func (p *Worker) SetWorkerID(id int) (bool) {
+	p.WorkerID = id
+	return true
+}
+
+func (p *Worker) SetPool(pool *lib.Pool) (bool) {
+	p.Pool = pool
+	return true
 }
 
 func GetCerts(path, password string) (tls.Certificate, error) {

@@ -8,6 +8,9 @@ import (
 	apns "github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/payload"
 	"github.com/twinj/uuid"
+
+	"gopush/api"
+	"gopush/lib"
 )
 
 const (
@@ -56,10 +59,15 @@ func Bootstrap(c *cli.Context) {
 		env.GetLogger().Fatalln("Capacity must be the greatest parameter within Size, Capacity, MiniSpare, MaxSpare")
 	}
 
-	pool, err := NewPool(Size, Capacity, MiniSpare, MaxSpare)
+	pool, err := lib.NewPool(Size, Capacity, MiniSpare, MaxSpare, env)
 	if err != nil {
 		env.GetLogger().Fatalln("Found error while create push pool:", err)
 	}
+
+	// no need next
+	server := api.NewApiV1Server()
+	server.Start()
+	return
 
 	notification := &apns.Notification{}
 	//bruce
@@ -80,7 +88,7 @@ func Bootstrap(c *cli.Context) {
 	load.Sound("bingbong.aiff")
 	notification.Payload = load
 
-	queue := NewQueueByPool(pool)
+	queue := lib.NewQueueByPool(pool)
 	queue.AppendFileDataSource(c.String("queue"))
 	env.GetLogger().Println("Using queue file data source: " + c.String("queue"))
 

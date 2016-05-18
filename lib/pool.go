@@ -1,5 +1,5 @@
 // Copyright 2016 祝景法(Bruce)@haimi.com. www.haimi.com All rights reserved.
-package apns
+package lib
 
 import (
 	"sync"
@@ -8,12 +8,11 @@ import (
 	apns "github.com/sideshow/apns2"
 
 	loglocal "zooinit/log"
-	"strconv"
 )
 
 type Pool struct {
 	//worker pool
-	Workers       []*Worker
+	Workers       []Worker
 	WorkerIDIndex int
 
 	//worker poll size
@@ -36,17 +35,19 @@ type Pool struct {
 
 	OKLogger      *loglocal.BufferedFileLogger
 	FailLogger    *loglocal.BufferedFileLogger
+
+	Env           EnvInfo
 }
 
 // create a new worker pool
-func NewPool(Size, Capacity, MiniSpare, MaxSpare int) (*Pool, error) {
-	workers := make([]*Worker, Size, Capacity)
+func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error) {
+	workers := make([]Worker, Size, Capacity)
 	WorkerIDIndex := 0
 
 	pool := &Pool{Size:Size, Capacity:Capacity, MaxSpare:MaxSpare, MiniSpare:MiniSpare}
 
 	for iter, _ := range workers {
-		worker, err := NewWorker(env)
+		worker, err := Env.CreateWorker()
 		if err != nil {
 			return nil, err
 		}
@@ -54,10 +55,10 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int) (*Pool, error) {
 		//不能用append, 会增长数组.
 		//workers=append(workers, worker)
 		//start from 0
-		worker.WorkerID = iter
+		worker.SetWorkerID(iter)
 		WorkerIDIndex = iter
 
-		worker.Pool = pool
+		worker.SetPool(pool)
 
 		workers[iter] = worker
 	}
@@ -69,20 +70,20 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int) (*Pool, error) {
 	return pool, nil
 }
 
-func (p *Pool) FetchASpareWork() *Worker {
+func (p *Pool) FetchASpareWork() Worker {
 	return nil
 }
 
 func (p *Pool) Run(list *DeviceQueue, msg *apns.Notification) {
 	con, err := msg.MarshalJSON()
 	if err != nil {
-		env.GetLogger().Println("msg.MarshalJSON() found error:", err)
+		p.Env.GetLogger().Println("msg.MarshalJSON() found error:", err)
 		return
 	}
-	env.GetLogger().Println("Receive new push task: " + string(con))
+	p.Env.GetLogger().Println("Receive new push task: " + string(con))
 
 	if len(p.Workers) != p.Size {
-		env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Size)
+		p.Env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Size)
 	}
 
 	// start up worker
@@ -91,7 +92,10 @@ func (p *Pool) Run(list *DeviceQueue, msg *apns.Notification) {
 		//env.GetLogger().Println(worker.GetWorkerName()+" ...")
 
 		//TODO Here has an error Mode if run in anonymous func, worker started is not in expected mode
-		go worker.Run()
+		go func() {
+			worker.Run()
+			p.wg.Done()
+		}()
 
 		//goroutine wg.done in worker.Run()
 	}
@@ -101,24 +105,6 @@ func (p *Pool) Run(list *DeviceQueue, msg *apns.Notification) {
 
 	// wait for all done worker.Run() / worker.Subscribe()
 	p.wg.Wait()
-}
-
-// test code
-func (p *Pool) Test(list *DeviceQueue, msg *apns.Notification) {
-	//need to be copy
-	msgLocal := *msg
-	msgLocal.DeviceToken = "3523544012e5491b3fe8cf6627eddd123d6aa4191fbebf371191a3ce7d4c02ac"
-	//failed test DeviceTokenNotForTopic
-	//msgLocal.DeviceToken="fc9f5a80b3338e0259d235e3b7cef12d12137d888d8b7901005e258df5f1a863"
-
-	request := NewWorkerRequeset(&msgLocal, WORKER_COMMAND_SEND)
-	p.Workers[0].PushChannel <- request
-	resp := <-p.Workers[0].ResponseChannel
-	env.GetLogger().Println("Receive new push result: ", *resp)
-
-	for key, value := range list.data {
-		env.GetLogger().Println(strconv.Itoa(key) + " -> " + value)
-	}
 }
 
 func (p *Pool) Send(list *DeviceQueue, msg *apns.Notification) {
@@ -151,7 +137,7 @@ func (p *Pool) GetFailLogger() (*loglocal.BufferedFileLogger) {
 }
 
 func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) {
-	filename := loglocal.GenerateFileLogPathName(env.LogPath, "pool_" + logtype)
+	filename := loglocal.GenerateFileLogPathName(p.Env.GetLogPath(), "pool_" + logtype)
 	file, err := loglocal.NewFileLog(filename)
 	if err != nil {
 		log.Fatalln(err)
