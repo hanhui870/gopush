@@ -97,7 +97,6 @@ func (p *Pool) Run(list *DeviceQueue, msg *apns.Notification) {
 			p.wg.Done()
 		}()
 
-		//goroutine wg.done in worker.Run()
 	}
 
 	//p.Test(list, msg)
@@ -114,9 +113,11 @@ func (p *Pool) Send(list *DeviceQueue, msg *apns.Notification) {
 	for _, worker := range p.Workers {
 
 		p.wg.Add(1)
-		go worker.Subscribe(list, msg)
 
-		//goroutine wg.done in worker.Subscribe()
+		go func() {
+			worker.Subscribe(list, msg)
+			p.wg.Done()
+		}()
 	}
 }
 
