@@ -9,34 +9,46 @@ import (
 
 //An http server type
 type Server struct {
-	server *http.ServeMux
+	handler *http.ServeMux
+
+	server  *http.Server
 
 	//Worker pool
-	pool   lib.Pool
+	pool    *lib.Pool
 
 	//Env info
-	env    lib.EnvInfo
+	env     lib.EnvInfo
 }
 
-func NewServer() *Server {
-	return &Server{server:http.NewServeMux()}
+func NewServer(env lib.EnvInfo) *Server {
+	handle := http.NewServeMux()
+	return &Server{handler:handle, server:&http.Server{Handler:handle}, env:env}
 }
 
-func (s *Server) Start() {
+func (s *Server) Start() error {
+	s.server.Addr = s.env.GetServerAddr()
 
+	s.env.GetLogger().Println("Server http://" + s.server.Addr + " started...")
+	return s.server.ListenAndServe()
 }
 
 func (s *Server) Stop() {
 
 }
 
-// Handle registers the handler for the given pattern in the DefaultServeMux.
+func (s *Server) SetPool(pool *lib.Pool) (bool) {
+	s.pool = pool
+
+	return true
+}
+
+// Handle registers th+e handler for the given pattern in the DefaultServeMux.
 func (s *Server) Handle(pattern string, handler http.Handler) {
-	s.server.Handle(pattern, handler)
+	s.handler.Handle(pattern, handler)
 }
 
 // HandleFunc registers the handler function for the given pattern in the DefaultServeMux.
 func (s *Server) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	s.server.HandleFunc(pattern, handler)
+	s.handler.HandleFunc(pattern, handler)
 }
 

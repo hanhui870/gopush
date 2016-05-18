@@ -65,8 +65,13 @@ func Bootstrap(c *cli.Context) {
 	}
 
 	// no need next
-	server := api.NewApiV1Server()
-	server.Start()
+	server := api.NewApiV1Server(env)
+	server.SetPool(pool)
+	err = server.Start()
+
+	if err != nil {
+		env.GetLogger().Fatalln("Found error while server.Start():", err)
+	}
 	return
 
 	notification := &apns.Notification{}
