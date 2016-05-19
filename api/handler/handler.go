@@ -6,12 +6,20 @@ import (
 	"fmt"
 )
 
-func Send(w http.ResponseWriter, r *http.Request) {
+type PushApi struct {
+	server Server
+}
+
+func NewPushApi(server Server) *PushApi {
+	return &PushApi{server:server}
+}
+
+func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	formatNormalResponceHeader(w)
 
 	fmt.Fprintln(w, `{"success":true,"message":"hello world."}`)
 }
 
-func AddDevice(w http.ResponseWriter, r *http.Request) {
+func (api *PushApi) AddDevice(w http.ResponseWriter, r *http.Request) {
 
 }

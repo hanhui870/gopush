@@ -9,8 +9,9 @@ import (
 func NewApiV1Server(env lib.EnvInfo) *Server {
 	server := NewServer(env)
 
-	server.HandleFunc("/api/v1/send", handler.Send)
-	server.HandleFunc("/api/v1/add-device", handler.AddDevice)
+	api := handler.NewPushApi(server)
+	server.HandleFunc("/api/v1/send", api.Send)
+	server.HandleFunc("/api/v1/add-device", api.AddDevice)
 
 	return server
 }

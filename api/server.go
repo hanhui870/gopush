@@ -36,6 +36,14 @@ func (s *Server) Stop() {
 
 }
 
+func (s *Server) GetPool() *lib.Pool {
+	return s.pool
+}
+
+func (s *Server) GetEnv() lib.EnvInfo {
+	return s.env
+}
+
 func (s *Server) SetPool(pool *lib.Pool) (bool) {
 	s.pool = pool
 
