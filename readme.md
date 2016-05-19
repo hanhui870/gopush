@@ -9,5 +9,6 @@
 2. Result stats.
 3. HA.
 4. Cli Mode
+5. Multi App support.
 
 
