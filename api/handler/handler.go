@@ -4,6 +4,8 @@ package handler
 import (
 	"net/http"
 	"fmt"
+	"encoding/json"
+	"bytes"
 )
 
 type PushApi struct {
@@ -14,12 +16,79 @@ func NewPushApi(server Server) *PushApi {
 	return &PushApi{server:server}
 }
 
+// Send API
+//
+// DESC: Send an notification to the pool
+// Params:
+//		title: notification title
+//		body: notification body info
+//		custom: json string, map[string][string], eg. custom={"payload": "haimi-590"}
+//		sound: notification sound
+//		queue: send queue, empty will use default all users.
+//		deviceids: Send to specified id, not required.
 func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	formatNormalResponceHeader(w)
+	r.ParseForm()
 
-	fmt.Fprintln(w, `{"success":true,"message":"hello world."}`)
+	if r.Method != HTTP_METHOD_POST {
+		api.OutputResponse(w, &Response{Error:true, Message:"HTTP method POST is required.", Code:API_CODE_POST_NEEDED})
+		return
+	}
+
+	title, err := GetParamString(r, "title")
+	if err != nil {
+		api.OutputResponse(w, &Response{Error:true, Message:"Param title is required.", Code:API_CODE_PARAM_REQUIRED})
+		return
+	}
+
+	body, err := GetParamString(r, "body")
+	if err != nil {
+		api.OutputResponse(w, &Response{Error:true, Message:"Param body is required.", Code:API_CODE_PARAM_REQUIRED})
+		return
+	}
+
+	tmpArr, err := GetParamString(r, "custom")
+	var custom map[string]string
+	custom = make(map[string]string, 100)
+	if err == nil {
+		err = json.Unmarshal(bytes.NewBufferString(tmpArr).Bytes(), &custom)
+		if err != nil {
+			api.OutputResponse(w, &Response{Error:true, Message:"Param custom json parse failed:" + err.Error(), Code:API_CODE_PARAM_ERROR})
+			return
+		}
+	}
+
+	str, err := GetParamString(r, "sound")
+	var sound string
+	if err == nil {
+		sound = str
+	}else {
+		sound = ""
+	}
+
+	api.OutputResponse(w, &Response{Error:false, Message:fmt.Sprintln(title, body, custom, sound), Code:API_CODE_OK})
 }
 
 func (api *PushApi) AddDevice(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (api *PushApi) FormatResponseJson(resp interface{}) (string, error) {
+	result, err := json.Marshal(resp)
+	if err != nil {
+		return "", err
+	}else {
+		return string(result), nil
+	}
+}
+
+func (api *PushApi) OutputResponse(w http.ResponseWriter, resp interface{}) {
+	resp, err := api.FormatResponseJson(resp)
+	if err == nil {
+		fmt.Fprintln(w, resp)
+	}else {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, http.StatusText(http.StatusInternalServerError))
+		api.server.GetEnv().GetLogger().Println("Found error:", err)
+	}
 }
