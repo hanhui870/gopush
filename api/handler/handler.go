@@ -95,7 +95,12 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.server.GetPool().Send(devicequeue, msg)
+	position, err := api.server.GetPool().GetTaskQueue().Add(devicequeue, msg)
+	if err != nil {
+		api.OutputResponse(w, &Response{Error:true, Message:"Add to taskqueue error:" + err.Error(), Code:API_CODE_TASK_ERROR})
+	}else {
+
+	}
 	api.OutputResponse(w, &Response{Error:false, Message:"Sent:" + msg.Uuid, Code:API_CODE_OK})
 	return
 }

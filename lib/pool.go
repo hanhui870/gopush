@@ -39,6 +39,9 @@ type Pool struct {
 
 	//sending wg
 	sendWg        sync.WaitGroup
+
+	task          *TaskQueue
+	taskQueueChannel chan bool
 }
 
 // create a new worker pool
@@ -69,6 +72,10 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error
 	pool.WorkerIDIndex = WorkerIDIndex + 1
 	pool.Workers = workers
 	pool.Env = Env
+
+	//task info
+	pool.task = NewTaskQueue(pool)
+	pool.taskQueueChannel = make(chan bool, TASK_QUEUE_MAX_WAITING)
 
 	return pool, nil
 }
@@ -140,6 +147,10 @@ func (p *Pool) GetFailLogger() (*loglocal.BufferedFileLogger) {
 	}
 
 	return p.FailLogger
+}
+
+func (p *Pool) GetTaskQueue() (*TaskQueue) {
+	return p.task
 }
 
 func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) {
