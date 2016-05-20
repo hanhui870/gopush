@@ -26,7 +26,7 @@ func main() {
 	queueFlag := &cli.StringFlag{
 		Name:  "queue",
 		Value: "runtime/data/queue.txt",
-		Usage: "Text queue file of push.",
+		Usage: "Default text queue file of push.",
 	}
 
 	logChannel := &cli.StringFlag{
