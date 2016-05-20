@@ -15,10 +15,10 @@ type Worker interface {
 	Run()
 
 	// Subscribe device goroutine run
-	Subscribe(list *DeviceQueue, msg Message)
+	Subscribe(list *DeviceQueue, msg MessageInterface)
 
 	// Push a message
-	Push(msgLocal Message) (*WorkerResponse)
+	Push(msg MessageInterface, Device string) (*WorkerResponse)
 
 	// Fetch a worker identify
 	GetWorkerName() (string)
@@ -31,18 +31,24 @@ type Worker interface {
 }
 
 type WorkerRequeset struct {
-	Message interface{}
+	Message MessageInterface
+
+	//the specified device send to
+	Device  string
 
 	Cmd     int
 }
 
 //Create a new request
-func NewWorkerRequeset(msg interface{}, cmd int) *WorkerRequeset {
-	return &WorkerRequeset{Message:msg, Cmd:cmd}
+func NewWorkerRequeset(msg MessageInterface, device string, cmd int) *WorkerRequeset {
+	return &WorkerRequeset{Message:msg, Device:device, Cmd:cmd}
 }
 
 type WorkerResponse struct {
 	Response interface{}
+
+	//the specified device send to
+	Device   string
 
 	Error    error
 }

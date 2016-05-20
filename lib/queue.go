@@ -116,5 +116,8 @@ func (q *DeviceQueue) appendInternalData(key int, value string) error {
 	return nil
 }
 
+func (q *DeviceQueue) Len() int {
+	return len(q.data)
+}
 
 

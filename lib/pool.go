@@ -5,8 +5,6 @@ import (
 	"sync"
 	"log"
 
-	apns "github.com/sideshow/apns2"
-
 	loglocal "zooinit/log"
 )
 
@@ -74,14 +72,7 @@ func (p *Pool) FetchASpareWork() Worker {
 	return nil
 }
 
-func (p *Pool) Run(list *DeviceQueue, msg *apns.Notification) {
-	con, err := msg.MarshalJSON()
-	if err != nil {
-		p.Env.GetLogger().Println("msg.MarshalJSON() found error:", err)
-		return
-	}
-	p.Env.GetLogger().Println("Receive new push task: " + string(con))
-
+func (p *Pool) Run() {
 	if len(p.Workers) != p.Size {
 		p.Env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Size)
 	}
@@ -99,14 +90,18 @@ func (p *Pool) Run(list *DeviceQueue, msg *apns.Notification) {
 
 	}
 
-	//p.Test(list, msg)
-	p.Send(list, msg)
-
 	// wait for all done worker.Run() / worker.Subscribe()
 	p.wg.Wait()
 }
 
-func (p *Pool) Send(list *DeviceQueue, msg *apns.Notification) {
+func (p *Pool) Send(list *DeviceQueue, msg MessageInterface) {
+	con, err := msg.MarshalJSON()
+	if err != nil {
+		p.Env.GetLogger().Println("msg.MarshalJSON() found error:", err)
+		return
+	}
+	p.Env.GetLogger().Println("Receive new push task: " + string(con))
+
 	// Queue data publish
 	go list.Publish()
 

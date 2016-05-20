@@ -16,6 +16,9 @@ const (
 //param required
 	API_CODE_PARAM_REQUIRED
 	API_CODE_PARAM_ERROR
+	API_CODE_QUEUE_BUILD
+
+	DEVICEID_SEP = ","
 )
 
 type Server interface {

@@ -29,6 +29,10 @@ func (s *Server) Start() error {
 	s.server.Addr = s.env.GetServerAddr()
 
 	s.env.GetLogger().Println("Server http://" + s.server.Addr + " started...")
+
+	//pool worker run
+	go s.pool.Run()
+
 	return s.server.ListenAndServe()
 }
 

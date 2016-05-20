@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"encoding/json"
 	"bytes"
+	"strings"
+	"gopush/lib"
 )
 
 type PushApi struct {
@@ -25,7 +27,7 @@ func NewPushApi(server Server) *PushApi {
 //		custom: json string, map[string][string], eg. custom={"payload": "haimi-590"}
 //		sound: notification sound
 //		queue: send queue, empty will use default all users.
-//		deviceids: Send to specified id, not required.
+//		deviceids: Send to specified id, not required. delimited by ","
 func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	formatNormalResponceHeader(w)
 	r.ParseForm()
@@ -66,7 +68,33 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 		sound = ""
 	}
 
-	api.OutputResponse(w, &Response{Error:false, Message:fmt.Sprintln(title, body, custom, sound), Code:API_CODE_OK})
+	str, err = GetParamString(r, "queue")
+	var queue string
+	if err == nil {
+		queue = str
+	}else {
+		queue = ""
+	}
+
+	str, err = GetParamString(r, "deviceids")
+	var deviceids []string
+	if err == nil {
+		deviceids = strings.Split(str, DEVICEID_SEP)
+	}else {
+		deviceids = nil
+	}
+
+	msg := &lib.Message{Title:title, Body:body, Sound:sound}
+
+	qb := lib.NewQueueBuilder(queue, deviceids)
+	devicequeue, err := qb.ToDeviceQueue(api.server.GetPool().Capacity)
+	if err != nil {
+		api.OutputResponse(w, &Response{Error:true, Message:"Build send queue failed:" + err.Error(), Code:API_CODE_QUEUE_BUILD})
+		return
+	}
+
+	api.server.GetPool().Send(devicequeue, msg)
+
 }
 
 func (api *PushApi) AddDevice(w http.ResponseWriter, r *http.Request) {

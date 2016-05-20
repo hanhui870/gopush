@@ -10,6 +10,8 @@ import (
 
 	apns "github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/certificate"
+	"github.com/sideshow/apns2/payload"
+	"github.com/twinj/uuid"
 
 	"gopush/lib"
 )
@@ -57,7 +59,7 @@ func (p *Worker) Run() {
 				break
 			}else {
 				//return response
-				resp := p.Push(request.Message)
+				resp := p.Push(request.Message, request.Device)
 				p.ResponseChannel <- resp
 			}
 		}
@@ -65,18 +67,11 @@ func (p *Worker) Run() {
 }
 
 // this a goroutine run
-func (p *Worker) Subscribe(list *lib.DeviceQueue, msg lib.Message) {
+func (p *Worker) Subscribe(list *lib.DeviceQueue, msg lib.MessageInterface) {
 	for {
-		var msgLocal *apns.Notification
-		var ok bool
-		if msgLocal, ok = msg.(*apns.Notification); !ok {
-			// error type
-			return
-		}
+		DeviceToken := <-list.Channel
 
-		msgLocal.DeviceToken = <-list.Channel
-
-		request := lib.NewWorkerRequeset(&msgLocal, lib.WORKER_COMMAND_SEND)
+		request := lib.NewWorkerRequeset(msg, DeviceToken, lib.WORKER_COMMAND_SEND)
 		p.PushChannel <- request
 
 		//finish
@@ -84,14 +79,31 @@ func (p *Worker) Subscribe(list *lib.DeviceQueue, msg lib.Message) {
 	}
 }
 
-func (p *Worker) Push(msg lib.Message) (*lib.WorkerResponse) {
+func (p *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerResponse) {
 	p.Lock.Lock()
 
-	var msgLocal *apns.Notification
-	var ok bool
-	if msgLocal, ok = msg.(*apns.Notification); !ok {
-		return &lib.WorkerResponse{Response:nil, Error:errors.New("Msg is not instance of apns.Notification")}
+	msgLocal := &apns.Notification{}
+	msgLocal.DeviceToken = Device
+	msgLocal.ApnsID = uuid.NewV1().String()
+	msgLocal.Priority = 10
+	msgLocal.Topic = ""
+	load := payload.NewPayload()
+
+	load.Badge(1)
+	load.AlertTitle(msg.GetTitle())
+	load.AlertBody(msg.GetBody())
+	//Done push Turn to specific page machanism, addon field
+	if msg.GetCustom() != nil {
+		haimiPayloadKey := "payload"
+		if haimiPayload, ok := msg.GetCustom()[haimiPayloadKey]; ok {
+			if len(haimiPayload) > 0 {
+				load.Custom(haimiPayloadKey, "haimi-590")
+			}
+		}
 	}
+
+	load.Sound(msg.GetSound())
+	msgLocal.Payload = load
 
 	// working now
 	p.Status = lib.WORKER_STATUS_RUNNING
