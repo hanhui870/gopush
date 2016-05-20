@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"strings"
 	"gopush/lib"
+
+	"github.com/twinj/uuid"
 )
 
 type PushApi struct {
@@ -84,7 +86,7 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 		deviceids = nil
 	}
 
-	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom}
+	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom, Uuid:uuid.NewV1().String()}
 
 	qb := lib.NewQueueBuilder(queue, deviceids)
 	devicequeue, err := qb.ToDeviceQueue(api.server.GetPool().Capacity)
@@ -94,7 +96,8 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.server.GetPool().Send(devicequeue, msg)
-
+	api.OutputResponse(w, &Response{Error:false, Message:"Sent:" + msg.Uuid, Code:API_CODE_OK})
+	return
 }
 
 func (api *PushApi) AddDevice(w http.ResponseWriter, r *http.Request) {

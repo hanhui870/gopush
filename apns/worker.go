@@ -11,7 +11,6 @@ import (
 	apns "github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/certificate"
 	"github.com/sideshow/apns2/payload"
-	"github.com/twinj/uuid"
 
 	"gopush/lib"
 )
@@ -84,7 +83,7 @@ func (p *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 
 	msgLocal := &apns.Notification{}
 	msgLocal.DeviceToken = Device
-	msgLocal.ApnsID = uuid.NewV1().String()
+	msgLocal.ApnsID = msg.GetUuid()
 	msgLocal.Priority = 10
 	msgLocal.Topic = ""
 	load := payload.NewPayload()

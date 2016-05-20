@@ -29,12 +29,16 @@ type Pool struct {
 	//pool lock
 	Lock          sync.Mutex
 
+	//worker wg
 	wg            sync.WaitGroup
 
 	OKLogger      *loglocal.BufferedFileLogger
 	FailLogger    *loglocal.BufferedFileLogger
 
 	Env           EnvInfo
+
+	//sending wg
+	sendWg        sync.WaitGroup
 }
 
 // create a new worker pool
@@ -103,18 +107,23 @@ func (p *Pool) Send(list *DeviceQueue, msg MessageInterface) {
 	}
 	p.Env.GetLogger().Println("Receive new push task: " + string(con))
 
+	p.sendWg.Add(1)
 	// Queue data publish
-	go list.Publish()
+	go func() {
+		list.Publish()
+
+		p.sendWg.Done()
+	}()
 
 	for _, worker := range p.Workers {
-
-		p.wg.Add(1)
-
+		p.sendWg.Add(1)
 		go func() {
 			worker.Subscribe(list, msg)
-			p.wg.Done()
+			p.sendWg.Done()
 		}()
 	}
+
+	p.sendWg.Wait()
 }
 
 func (p *Pool) GetOKLogger() (*loglocal.BufferedFileLogger) {

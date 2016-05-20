@@ -1,7 +1,9 @@
 // Copyright 2016 祝景法(Bruce)@haimi.com. www.haimi.com All rights reserved.
 package lib
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type MessageInterface interface {
 	// fetch message title
@@ -16,6 +18,8 @@ type MessageInterface interface {
 	// fetch custom info
 	GetCustom() map[string]string
 
+	GetUuid() string
+
 	MarshalJSON() (string, error)
 }
 
@@ -27,6 +31,8 @@ type Message struct {
 	Custom map[string]string `json:"custom"`
 
 	Sound  string `json:"sound"`
+
+	Uuid   string `json:"uuid"`
 }
 
 func (m *Message)MarshalJSON() (string, error) {
@@ -56,4 +62,9 @@ func (m *Message)GetSound() string {
 // fetch custom info
 func (m *Message)GetCustom() map[string]string {
 	return m.Custom
+}
+
+// fetch sound info
+func (m *Message)GetUuid() string {
+	return m.Uuid
 }
