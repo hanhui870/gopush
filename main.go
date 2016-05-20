@@ -49,19 +49,19 @@ func main() {
 
 	size := &cli.IntFlag{
 		Name:  "size",
-		Value: 20,
+		Value: 5,
 		Usage: "Worker pool size, init size.",
 	}
 
 	capacity := &cli.IntFlag{
 		Name:  "capacity",
-		Value: 200,
+		Value: 500,
 		Usage: "Worker pool capacity.",
 	}
 
 	miniSpare := &cli.IntFlag{
 		Name:  "spare.mini",
-		Value: 10,
+		Value: 1,
 		Usage: "Worker pool miniSpare worker.",
 	}
 
