@@ -64,6 +64,7 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error
 	//WorkerIDIndex is last new one
 	pool.WorkerIDIndex = WorkerIDIndex + 1
 	pool.Workers = workers
+	pool.Env = Env
 
 	return pool, nil
 }

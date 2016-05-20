@@ -84,7 +84,7 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 		deviceids = nil
 	}
 
-	msg := &lib.Message{Title:title, Body:body, Sound:sound}
+	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom}
 
 	qb := lib.NewQueueBuilder(queue, deviceids)
 	devicequeue, err := qb.ToDeviceQueue(api.server.GetPool().Capacity)
