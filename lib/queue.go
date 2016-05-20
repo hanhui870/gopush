@@ -27,8 +27,6 @@ type DeviceQueue struct {
 	data        []string
 	//data locker
 	lock        sync.Mutex
-	//data change channel
-	dataChannel chan bool
 }
 
 func NewQueueByPool(p *Pool) (*DeviceQueue) {
@@ -40,7 +38,7 @@ func NewQueueByCapacity(Capacity int) (*DeviceQueue) {
 	//Capacity equal to pool
 	chanCreate := make(chan string, Capacity)
 
-	return &DeviceQueue{Channel:chanCreate, Position:0, dataChannel:make(chan bool, 10)}
+	return &DeviceQueue{Channel:chanCreate, Position:0}
 }
 
 func NewQueue() (*DeviceQueue) {
@@ -54,8 +52,8 @@ func (q *DeviceQueue) Publish() {
 			q.Channel <- q.data[q.Position]
 			q.Position++
 		}else {
-			//wait data change
-			<-q.dataChannel
+			//finish work
+			break
 		}
 	}
 }
@@ -85,8 +83,6 @@ func (q *DeviceQueue) AppendFileDataSource(filename string) error {
 		}
 	}
 
-	//notify data change
-	q.dataChannel <- true
 	return nil
 }
 
@@ -101,8 +97,6 @@ func (q *DeviceQueue) AppendDataSource(list []string) error {
 		}
 	}
 
-	//notify data change
-	q.dataChannel <- true
 	return nil
 }
 
