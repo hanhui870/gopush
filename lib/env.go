@@ -10,5 +10,6 @@ type EnvInfo interface {
 	cluster.Env
 
 	CreateWorker() (Worker, error)
-}
 
+	GetPoolConfig() (*PoolConfig)
+}

@@ -23,7 +23,7 @@ const (
 )
 
 type Server interface {
-	GetPool() *lib.Pool
+	GetTaskQueue() *lib.TaskQueue
 
 	GetEnv() lib.EnvInfo
 }

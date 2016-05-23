@@ -13,8 +13,8 @@ type Server struct {
 
 	server  *http.Server
 
-	//Worker pool
-	pool    *lib.Pool
+	//Server task queue
+	task    *lib.TaskQueue
 
 	//Env info
 	env     lib.EnvInfo
@@ -22,7 +22,7 @@ type Server struct {
 
 func NewServer(env lib.EnvInfo) *Server {
 	handle := http.NewServeMux()
-	return &Server{handler:handle, server:&http.Server{Handler:handle}, env:env}
+	return &Server{handler:handle, server:&http.Server{Handler:handle}, env:env, task:lib.NewTaskQueue()}
 }
 
 func (s *Server) Start() error {
@@ -30,8 +30,8 @@ func (s *Server) Start() error {
 
 	s.env.GetLogger().Println("Server http://" + s.server.Addr + " started...")
 
-	//pool worker run
-	go s.pool.Run()
+	//Server taskqueue run
+	go s.task.Run()
 
 	return s.server.ListenAndServe()
 }
@@ -40,18 +40,12 @@ func (s *Server) Stop() {
 
 }
 
-func (s *Server) GetPool() *lib.Pool {
-	return s.pool
+func (s *Server) GetTaskQueue() *lib.TaskQueue {
+	return s.task
 }
 
 func (s *Server) GetEnv() lib.EnvInfo {
 	return s.env
-}
-
-func (s *Server) SetPool(pool *lib.Pool) (bool) {
-	s.pool = pool
-
-	return true
 }
 
 // Handle registers th+e handler for the given pattern in the DefaultServeMux.

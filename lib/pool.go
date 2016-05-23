@@ -4,6 +4,7 @@ package lib
 import (
 	"sync"
 	"log"
+	"errors"
 
 	loglocal "zooinit/log"
 )
@@ -41,7 +42,6 @@ type Pool struct {
 	sendWg        sync.WaitGroup
 
 	task          *TaskQueue
-	taskQueueChannel chan bool
 }
 
 // create a new worker pool
@@ -72,10 +72,6 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error
 	pool.WorkerIDIndex = WorkerIDIndex + 1
 	pool.Workers = workers
 	pool.Env = Env
-
-	//task info
-	pool.task = NewTaskQueue(pool)
-	pool.taskQueueChannel = make(chan bool, TASK_QUEUE_MAX_WAITING)
 
 	return pool, nil
 }
@@ -162,4 +158,33 @@ func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) 
 
 	logger := log.New(file, "", log.Ldate | log.Ltime | log.Lmicroseconds) // add time for stat
 	return loglocal.GetBufferedFileLogger(file, logger)
+}
+
+type PoolConfig struct {
+	Size      int
+	Capacity  int
+	MiniSpare int
+	MaxSpare  int
+}
+
+func NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare int) (*PoolConfig, error) {
+	if Size <= 0 || Capacity <= 0 || MiniSpare <= 0 || MaxSpare <= 0 {
+		return nil, errors.New("All Size, Capacity, MiniSpare, MaxSpare parameters must all >0")
+	}
+	if Size < MiniSpare {
+		Size = MiniSpare
+		return nil, errors.New("Size<MiniSpare, will change to equal to MiniSpare")
+	}
+	if Size > Capacity {
+		Size = Capacity
+		return nil, errors.New("Size>Capacity, will change to equal to Capacity")
+	}
+	if MiniSpare > MaxSpare {
+		return nil, errors.New("MiniSpare must <= MaxSpare")
+	}
+	if Size > Capacity || MiniSpare > Capacity || MaxSpare >= Capacity {
+		return nil, errors.New("Capacity must be the greatest parameter within Size, Capacity, MiniSpare, MaxSpare")
+	}
+
+	return &PoolConfig{Size:Size, Capacity:Capacity, MiniSpare:MiniSpare, MaxSpare:MaxSpare}, nil
 }

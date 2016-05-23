@@ -33,37 +33,20 @@ func Bootstrap(c *cli.Context) {
 	MiniSpare = c.Int("spare.mini")
 	MaxSpare = c.Int("spare.max")
 
-	env.GetLogger().Println("Push Worker Size:", Size)
-	env.GetLogger().Println("Push Worker Capacity:", Capacity)
-	env.GetLogger().Println("Push Worker MiniSpare:", MiniSpare)
-	env.GetLogger().Println("Push Worker MaxSpare:", MaxSpare)
-
-	if Size <= 0 || Capacity <= 0 || MiniSpare <= 0 || MaxSpare <= 0 {
-		env.GetLogger().Fatalln("All Size, Capacity, MiniSpare, MaxSpare parameters must all >0")
-	}
-	if Size < MiniSpare {
-		Size = MiniSpare
-		env.GetLogger().Println("Size<MiniSpare, will change to equal to MiniSpare")
-	}
-	if Size > Capacity {
-		Size = Capacity
-		env.GetLogger().Println("Size>Capacity, will change to equal to Capacity")
-	}
-	if MiniSpare > MaxSpare {
-		env.GetLogger().Fatalln("MiniSpare must <= MaxSpare")
-	}
-	if Size > Capacity || MiniSpare > Capacity || MaxSpare >= Capacity {
-		env.GetLogger().Fatalln("Capacity must be the greatest parameter within Size, Capacity, MiniSpare, MaxSpare")
-	}
-
-	pool, err := lib.NewPool(Size, Capacity, MiniSpare, MaxSpare, env)
+	poolCfg, err := lib.NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare)
 	if err != nil {
-		env.GetLogger().Fatalln("Found error while create push pool:", err)
+		env.GetLogger().Fatalln("Found error while create PoolConfig:", err)
 	}
+
+	env.GetLogger().Println("Push Worker Size:", poolCfg.Size)
+	env.GetLogger().Println("Push Worker Capacity:", poolCfg.Capacity)
+	env.GetLogger().Println("Push Worker MiniSpare:", poolCfg.MiniSpare)
+	env.GetLogger().Println("Push Worker MaxSpare:", poolCfg.MaxSpare)
+
+	env.PoolConfig = poolCfg
 
 	// no need next
 	server := api.NewApiV1Server(env)
-	server.SetPool(pool)
 	err = server.Start()
 
 	if err != nil {

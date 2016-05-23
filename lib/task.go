@@ -8,6 +8,7 @@ import (
 
 const (
 	TASK_QUEUE_MAX_WAITING = 100
+	TASK_QUEUE_MAX_POOL = 5
 )
 
 type Task struct {
@@ -20,18 +21,21 @@ type Task struct {
 
 // task queue, cycle array
 type TaskQueue struct {
-	tasks      []*Task
+	tasks           []*Task
 
-	pool       *Pool
+	pool            []*Pool
 
-	Lock       sync.Mutex
+	Lock            sync.Mutex
 
-	readIndex  int
-	writeIndex int
+	readIndex       int
+	writeIndex      int
+
+	PushChannel     chan *Task
+	ResponseChannel chan bool
 }
 
-func NewTaskQueue(pool *Pool) *TaskQueue {
-	return &TaskQueue{pool:pool, tasks:make([]*Task, TASK_QUEUE_MAX_WAITING)}
+func NewTaskQueue() *TaskQueue {
+	return &TaskQueue{pool:make([]*Pool, TASK_QUEUE_MAX_POOL), tasks:make([]*Task, TASK_QUEUE_MAX_WAITING)}
 }
 
 // add a new task
@@ -46,8 +50,10 @@ func (tq *TaskQueue)Add(list *DeviceQueue, msg MessageInterface) (int, error) {
 	task := &Task{list:list, message:msg}
 	tq.tasks = append(tq.tasks, task)
 
-	// notify
-	tq.pool.taskQueueChannel <- true
-
 	return len(tq.tasks), nil
+}
+
+// run task queue dispatch run
+func (tq *TaskQueue) Run() {
+
 }

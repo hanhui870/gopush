@@ -18,6 +18,8 @@ type EnvInfo struct {
 
 	CertPath     string
 	CertPassword string
+
+	PoolConfig   *lib.PoolConfig
 }
 
 func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
@@ -62,4 +64,8 @@ func (p *EnvInfo) CreateWorker() (lib.Worker, error) {
 	}
 
 	return worker, nil
+}
+
+func (p *EnvInfo) GetPoolConfig() (*lib.PoolConfig) {
+	return p.PoolConfig
 }
