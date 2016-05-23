@@ -10,6 +10,7 @@ import (
 	"gopush/lib"
 
 	"github.com/twinj/uuid"
+	"strconv"
 )
 
 type PushApi struct {
@@ -98,10 +99,17 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	position, err := api.server.GetPool().GetTaskQueue().Add(devicequeue, msg)
 	if err != nil {
 		api.OutputResponse(w, &Response{Error:true, Message:"Add to taskqueue error:" + err.Error(), Code:API_CODE_TASK_ERROR})
-	}else {
-
+		return
 	}
-	api.OutputResponse(w, &Response{Error:false, Message:"Sent:" + msg.Uuid, Code:API_CODE_OK})
+
+	//Send Response
+	resp := new(SendResponse)
+	resp.Position = position
+	resp.PushID = msg.Uuid
+	resp.Error = false
+	resp.Message = "Sent:" + msg.Uuid + " Position:" + strconv.Itoa(position)
+	resp.Code = API_CODE_OK
+	api.OutputResponse(w, resp)
 	return
 }
 

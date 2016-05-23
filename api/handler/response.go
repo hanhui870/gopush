@@ -14,7 +14,9 @@ type Response struct {
 type SendResponse struct {
 	Response
 
-	PushID int64 `json:"push-id"`
+	//uuid
+	PushID   string `json:"push-id"`
+	Position int `json:"position"`
 }
 
 

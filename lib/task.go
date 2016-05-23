@@ -18,7 +18,7 @@ type Task struct {
 	message MessageInterface
 }
 
-// task queue
+// task queue, cycle array
 type TaskQueue struct {
 	tasks      []*Task
 
@@ -31,7 +31,7 @@ type TaskQueue struct {
 }
 
 func NewTaskQueue(pool *Pool) *TaskQueue {
-	return &TaskQueue{pool:pool, make([]*Task, TASK_QUEUE_MAX_WAITING)}
+	return &TaskQueue{pool:pool, tasks:make([]*Task, TASK_QUEUE_MAX_WAITING)}
 }
 
 // add a new task
