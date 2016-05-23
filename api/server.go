@@ -22,7 +22,9 @@ type Server struct {
 
 func NewServer(env lib.EnvInfo) *Server {
 	handle := http.NewServeMux()
-	return &Server{handler:handle, server:&http.Server{Handler:handle}, env:env, task:lib.NewTaskQueue()}
+	server := &Server{handler:handle, server:&http.Server{Handler:handle}, env:env}
+	server.task = lib.NewTaskQueue(server)
+	return server
 }
 
 func (s *Server) Start() error {

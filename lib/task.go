@@ -21,6 +21,8 @@ type Task struct {
 
 // task queue, cycle array
 type TaskQueue struct {
+	server          Server
+
 	tasks           []*Task
 
 	pool            []*Pool
@@ -34,8 +36,8 @@ type TaskQueue struct {
 	ResponseChannel chan bool
 }
 
-func NewTaskQueue() *TaskQueue {
-	return &TaskQueue{pool:make([]*Pool, TASK_QUEUE_MAX_POOL), tasks:make([]*Task, TASK_QUEUE_MAX_WAITING)}
+func NewTaskQueue(server Server) *TaskQueue {
+	return &TaskQueue{pool:make([]*Pool, TASK_QUEUE_MAX_POOL), tasks:make([]*Task, TASK_QUEUE_MAX_WAITING), server:server}
 }
 
 // add a new task

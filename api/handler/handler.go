@@ -14,10 +14,10 @@ import (
 )
 
 type PushApi struct {
-	server Server
+	server lib.Server
 }
 
-func NewPushApi(server Server) *PushApi {
+func NewPushApi(server lib.Server) *PushApi {
 	return &PushApi{server:server}
 }
 
@@ -35,7 +35,7 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	formatNormalResponceHeader(w)
 	r.ParseForm()
 
-	if r.Method != HTTP_METHOD_POST {
+	if r.Method != lib.HTTP_METHOD_POST {
 		api.OutputResponse(w, &Response{Error:true, Message:"HTTP method POST is required.", Code:API_CODE_POST_NEEDED})
 		return
 	}
