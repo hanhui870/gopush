@@ -31,7 +31,7 @@ type DeviceQueue struct {
 
 func NewQueueByPool(p *Pool) (*DeviceQueue) {
 	//2 times of pool capacity
-	return NewQueueByCapacity(p.Capacity * 2)
+	return NewQueueByCapacity(p.Config.Capacity * 2)
 }
 
 func NewQueueByCapacity(Capacity int) (*DeviceQueue) {

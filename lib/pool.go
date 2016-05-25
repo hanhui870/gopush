@@ -12,55 +12,72 @@ import (
 const (
 	POOL_STATUS_SPARE = iota
 	POOL_STATUS_RUNNING
+
+	POOL_DEFAULT_SIZE = 5
+	POOL_DEFAULT_CAPACITY = 500
+	POOL_DEFAULT_MINISPARE = 1
+	POOL_DEFAULT_MAXSPARE = 50
 )
 
 //TODO pool automatic resize if needed
 type Pool struct {
 	//worker pool
-	Workers       []Worker
-	WorkerIDIndex int
+	Workers    []Worker
 
 	//Pool status
-	Status        int
-	PoolID        int
+	Status     int
+	PoolID     int
 
-	//worker poll size
-	//MiniSpare <= now <= Capacity
-	Size          int
-
-	//pool capacity
-	Capacity      int
-
-	//mini spare worker
-	MiniSpare     int
-
-	//max spare worker
-	MaxSpare      int
+	Config     *PoolConfig
 
 	//pool lock
-	Lock          sync.Mutex
+	Lock       sync.Mutex
 
 	//worker wg
-	wg            sync.WaitGroup
+	wg         sync.WaitGroup
 
-	OKLogger      *loglocal.BufferedFileLogger
-	FailLogger    *loglocal.BufferedFileLogger
+	OKLogger   *loglocal.BufferedFileLogger
+	FailLogger *loglocal.BufferedFileLogger
 
-	Env           EnvInfo
+	Env        EnvInfo
 
 	//sending wg
-	sendWg        sync.WaitGroup
+	sendWg     sync.WaitGroup
 
 	//Every related to a Task, which can be changed every run.
-	task          *Task
+	task       *Task
 }
+
+type PoolConfig struct {
+	//worker poll size
+	//MiniSpare <= now <= Capacity
+	Size      int
+
+	//pool capacity
+	Capacity  int
+
+	//mini spare worker
+	MiniSpare int
+
+	//max spare worker
+	MaxSpare  int
+}
+
 
 // create a new worker pool
 func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error) {
-	workers := make([]Worker, Size, Capacity)
-	WorkerIDIndex := 0
+	config, err := NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare)
+	if err != nil {
+		return nil, err
+	}
 
-	pool := &Pool{Size:Size, Capacity:Capacity, MaxSpare:MaxSpare, MiniSpare:MiniSpare}
+	return NewPoolByConfig(config, Env)
+}
+
+func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
+	workers := make([]Worker, config.Size, config.Capacity)
+
+	pool := &Pool{Config:config}
 
 	for iter, _ := range workers {
 		worker, err := Env.CreateWorker()
@@ -72,17 +89,17 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error
 		//workers=append(workers, worker)
 		//start from 0
 		worker.SetWorkerID(iter)
-		WorkerIDIndex = iter
 
 		worker.SetPool(pool)
 
 		workers[iter] = worker
 	}
 
-	//WorkerIDIndex is last new one
-	pool.WorkerIDIndex = WorkerIDIndex + 1
 	pool.Workers = workers
 	pool.Env = Env
+
+	//run when created.
+	go pool.Run()
 
 	return pool, nil
 }
@@ -92,8 +109,8 @@ func (p *Pool) FetchASpareWork() Worker {
 }
 
 func (p *Pool) Run() {
-	if len(p.Workers) != p.Size {
-		p.Env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Size)
+	if len(p.Workers) != p.Config.Size {
+		p.Env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Config.Size)
 	}
 
 	// start up worker
@@ -113,8 +130,12 @@ func (p *Pool) Run() {
 	p.wg.Wait()
 }
 
-func (p *Pool) Send(list *DeviceQueue, msg MessageInterface) {
-	con, err := msg.MarshalJSON()
+// finish, taskqueue's finish channel
+func (p *Pool) Send(task *Task, finish chan int) {
+	p.Lock.Lock()
+	p.Status = POOL_STATUS_RUNNING
+
+	con, err := task.message.MarshalJSON()
 	if err != nil {
 		p.Env.GetLogger().Println("msg.MarshalJSON() found error:", err)
 		return
@@ -124,7 +145,7 @@ func (p *Pool) Send(list *DeviceQueue, msg MessageInterface) {
 	p.sendWg.Add(1)
 	// Queue data publish
 	go func() {
-		list.Publish()
+		task.list.Publish()
 
 		p.sendWg.Done()
 	}()
@@ -132,12 +153,16 @@ func (p *Pool) Send(list *DeviceQueue, msg MessageInterface) {
 	for _, worker := range p.Workers {
 		p.sendWg.Add(1)
 		go func() {
-			worker.Subscribe(list, msg)
+			worker.Subscribe(task)
 			p.sendWg.Done()
 		}()
 	}
 
 	p.sendWg.Wait()
+
+	p.Lock.Unlock()
+	p.Status = POOL_STATUS_SPARE
+	finish <- p.PoolID
 }
 
 func (p *Pool) GetOKLogger() (*loglocal.BufferedFileLogger) {
@@ -160,6 +185,34 @@ func (p *Pool) GetTask() (*Task) {
 	return p.task
 }
 
+//TODO Resize pool worker pools
+func (p *Pool) Resize(size int) (error) {
+
+	return nil
+}
+
+//TODO add more workers
+//can add when running
+func (p *Pool) expand(size int) (error) {
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
+	return nil
+}
+
+//TODO harvest workers
+//can not harvest when running
+func (p *Pool) harvest(size int) (error) {
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
+	if p.Status == POOL_STATUS_RUNNING {
+		return errors.New("Pool can't add worker when running.")
+	}
+
+	return nil
+}
+
 func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) {
 	filename := loglocal.GenerateFileLogPathName(p.Env.GetLogPath(), "pool_" + logtype)
 	file, err := loglocal.NewFileLog(filename)
@@ -169,13 +222,6 @@ func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) 
 
 	logger := log.New(file, "", log.Ldate | log.Ltime | log.Lmicroseconds) // add time for stat
 	return loglocal.GetBufferedFileLogger(file, logger)
-}
-
-type PoolConfig struct {
-	Size      int
-	Capacity  int
-	MiniSpare int
-	MaxSpare  int
 }
 
 func NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare int) (*PoolConfig, error) {
@@ -198,4 +244,24 @@ func NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare int) (*PoolConfig, error)
 	}
 
 	return &PoolConfig{Size:Size, Capacity:Capacity, MiniSpare:MiniSpare, MaxSpare:MaxSpare}, nil
+}
+
+func (pc *PoolConfig) SetSizeByQueueLength(length int) {
+	if length <= 10 {
+		pc.Size = pc.MiniSpare
+	}else if length <= 100 {
+		pc.Size = pc.MiniSpare * 2
+	}else if length <= 1000 {
+		pc.Size = pc.MiniSpare * 5
+	}else if length <= 1000 {
+		pc.Size = pc.MiniSpare * 10
+	}else if length <= 10000 {
+		pc.Size = pc.MiniSpare * 50
+	}else {
+		pc.Size = pc.Capacity
+	}
+
+	if pc.Size > pc.Capacity {
+		pc.Size = pc.Capacity
+	}
 }

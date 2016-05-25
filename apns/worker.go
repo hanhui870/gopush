@@ -66,11 +66,11 @@ func (p *Worker) Run() {
 }
 
 // this a goroutine run
-func (p *Worker) Subscribe(list *lib.DeviceQueue, msg lib.MessageInterface) {
+func (p *Worker) Subscribe(task *lib.Task) {
 	for {
-		DeviceToken := <-list.Channel
+		DeviceToken := <-task.GetList().Channel
 
-		request := lib.NewWorkerRequeset(msg, DeviceToken, lib.WORKER_COMMAND_SEND)
+		request := lib.NewWorkerRequeset(task.GetMessage(), DeviceToken, lib.WORKER_COMMAND_SEND)
 		p.PushChannel <- request
 
 		//finish

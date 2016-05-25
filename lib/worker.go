@@ -15,7 +15,7 @@ type Worker interface {
 	Run()
 
 	// Subscribe device goroutine run
-	Subscribe(list *DeviceQueue, msg MessageInterface)
+	Subscribe(task *Task)
 
 	// Push a message
 	Push(msg MessageInterface, Device string) (*WorkerResponse)
