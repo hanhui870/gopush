@@ -181,10 +181,11 @@ func (tq *TaskQueue) publish() {
 				go func() {
 					//triger sending
 					poolSelected.Send(task, tq.poolFinishChannel)
-
-					//pop task when finished
-					tq.Pop()
 				}()
+
+				//pop task when started, or will resend
+				//TODO if send failed
+				tq.Pop()
 
 			}else {
 				//read notify
