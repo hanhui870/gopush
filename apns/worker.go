@@ -67,6 +67,7 @@ func (p *Worker) Run() {
 
 // this a goroutine run
 func (p *Worker) Subscribe(task *lib.Task) {
+	env.GetLogger().Println(p.GetWorkerName() + " started to Subscribe...")
 	for {
 		DeviceToken, more := <-task.GetList().Channel
 		if more {

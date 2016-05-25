@@ -16,7 +16,8 @@ const (
 
 	POOL_DEFAULT_SIZE = 5
 	POOL_DEFAULT_CAPACITY = 500
-	POOL_DEFAULT_MINISPARE = 1
+//test multi workers can set to 2
+	POOL_DEFAULT_MINISPARE = 2
 	POOL_DEFAULT_MAXSPARE = 50
 )
 
@@ -114,7 +115,6 @@ func (p *Pool) Run() {
 		p.Env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Config.Size)
 	}
 
-	// start up worker
 	for _, worker := range p.Workers {
 		p.wg.Add(1)
 		//env.GetLogger().Println(worker.GetWorkerName()+" ...")
@@ -124,7 +124,6 @@ func (p *Pool) Run() {
 			worker.Run()
 			p.wg.Done()
 		}()
-
 	}
 
 	// wait for all done worker.Run() / worker.Subscribe()
