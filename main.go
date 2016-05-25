@@ -4,6 +4,7 @@ package main
 import (
 	"os"
 	"gopush/apns"
+	"gopush/lib"
 
 	"github.com/codegangsta/cli"
 )
@@ -49,25 +50,25 @@ func main() {
 
 	size := &cli.IntFlag{
 		Name:  "size",
-		Value: 5,
+		Value: lib.POOL_DEFAULT_SIZE,
 		Usage: "Worker pool size, init size.",
 	}
 
 	capacity := &cli.IntFlag{
 		Name:  "capacity",
-		Value: 500,
+		Value: lib.POOL_DEFAULT_CAPACITY,
 		Usage: "Worker pool capacity.",
 	}
 
 	miniSpare := &cli.IntFlag{
 		Name:  "spare.mini",
-		Value: 1,
+		Value: lib.POOL_DEFAULT_MINISPARE,
 		Usage: "Worker pool miniSpare worker.",
 	}
 
 	maxSpare := &cli.IntFlag{
 		Name:  "spare.max",
-		Value: 50,
+		Value: lib.POOL_DEFAULT_MAXSPARE,
 		Usage: "Worker pool maxSpare worker.",
 	}
 
