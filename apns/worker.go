@@ -136,7 +136,7 @@ func (p *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 }
 
 func (p *Worker) GetWorkerName() (string) {
-	return "worker_" + strconv.Itoa(p.WorkerID)
+	return "pool_" + strconv.Itoa(p.Pool.PoolID) + "_worker_" + strconv.Itoa(p.WorkerID)
 }
 
 func (p *Worker) SetWorkerID(id int) (bool) {
