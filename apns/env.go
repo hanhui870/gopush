@@ -66,6 +66,11 @@ func (p *EnvInfo) CreateWorker() (lib.Worker, error) {
 	return worker, nil
 }
 
+// TODO destroy
+func (p *EnvInfo) DestroyWorker(worker lib.Worker) (error) {
+	return nil
+}
+
 func (p *EnvInfo) GetPoolConfig() (*lib.PoolConfig) {
 	return p.PoolConfig
 }

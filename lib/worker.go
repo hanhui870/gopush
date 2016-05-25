@@ -28,6 +28,8 @@ type Worker interface {
 
 	// Set worker's belonging pool
 	SetPool(pool *Pool) (bool)
+
+	Destroy() (error)
 }
 
 type WorkerRequeset struct {

@@ -9,10 +9,19 @@ import (
 	loglocal "zooinit/log"
 )
 
+const (
+	POOL_STATUS_SPARE = iota
+	POOL_STATUS_RUNNING
+)
+
 type Pool struct {
 	//worker pool
 	Workers       []Worker
 	WorkerIDIndex int
+
+	//Pool status
+	Status        int
+	PoolID        int
 
 	//worker poll size
 	//MiniSpare <= now <= Capacity
@@ -41,7 +50,8 @@ type Pool struct {
 	//sending wg
 	sendWg        sync.WaitGroup
 
-	task          *TaskQueue
+	//Every related to a Task, which can be changed every run.
+	task          *Task
 }
 
 // create a new worker pool
@@ -145,7 +155,7 @@ func (p *Pool) GetFailLogger() (*loglocal.BufferedFileLogger) {
 	return p.FailLogger
 }
 
-func (p *Pool) GetTaskQueue() (*TaskQueue) {
+func (p *Pool) GetTask() (*Task) {
 	return p.task
 }
 

@@ -11,5 +11,7 @@ type EnvInfo interface {
 
 	CreateWorker() (Worker, error)
 
+	DestroyWorker(worker Worker) (error)
+
 	GetPoolConfig() (*PoolConfig)
 }

@@ -57,5 +57,7 @@ func (tq *TaskQueue)Add(list *DeviceQueue, msg MessageInterface) (int, error) {
 
 // run task queue dispatch run
 func (tq *TaskQueue) Run() {
+	//initilize pools and pick one to run
+
 
 }

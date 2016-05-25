@@ -149,6 +149,11 @@ func (p *Worker) SetPool(pool *lib.Pool) (bool) {
 	return true
 }
 
+func (p *Worker) Destroy() (error) {
+
+	return nil
+}
+
 func GetCerts(path, password string) (tls.Certificate, error) {
 	cert, pemErr := certificate.FromP12File(path, password)
 	if pemErr != nil {
@@ -157,3 +162,4 @@ func GetCerts(path, password string) (tls.Certificate, error) {
 
 	return cert, nil
 }
+
