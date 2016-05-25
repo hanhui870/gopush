@@ -5,6 +5,7 @@ import (
 	"sync"
 	"log"
 	"errors"
+//"time"
 
 	loglocal "zooinit/log"
 )
@@ -159,6 +160,9 @@ func (p *Pool) Send(task *Task, finish chan int) {
 	}
 
 	p.sendWg.Wait()
+
+	//test, pools iter
+	//time.Sleep(5*time.Second)
 
 	p.Lock.Unlock()
 	p.Status = POOL_STATUS_SPARE

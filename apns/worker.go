@@ -68,13 +68,16 @@ func (p *Worker) Run() {
 // this a goroutine run
 func (p *Worker) Subscribe(task *lib.Task) {
 	for {
-		DeviceToken := <-task.GetList().Channel
+		DeviceToken, more := <-task.GetList().Channel
+		if more {
+			request := lib.NewWorkerRequeset(task.GetMessage(), DeviceToken, lib.WORKER_COMMAND_SEND)
+			p.PushChannel <- request
 
-		request := lib.NewWorkerRequeset(task.GetMessage(), DeviceToken, lib.WORKER_COMMAND_SEND)
-		p.PushChannel <- request
-
-		//finish
-		<-p.ResponseChannel
+			//finish
+			<-p.ResponseChannel
+		}else {
+			break
+		}
 	}
 }
 

@@ -184,6 +184,7 @@ func (tq *TaskQueue) publish() {
 				go func() {
 					//triger sending
 					poolSelected.Send(task, tq.poolFinishChannel)
+
 				}()
 
 				//pop task when started, or will resend

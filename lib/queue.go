@@ -53,6 +53,7 @@ func (q *DeviceQueue) Publish() {
 			q.Position++
 		}else {
 			//finish work
+			close(q.Channel)
 			break
 		}
 	}
