@@ -169,6 +169,9 @@ func (tq *TaskQueue) publish() {
 						if err != nil {
 							tq.server.GetEnv().GetLogger().Println("Create pool failed:" + err.Error())
 						}else {
+							//update poolid
+							pool.PoolID = iter
+
 							tq.pools[iter] = pool
 							poolSelected = pool
 							break
