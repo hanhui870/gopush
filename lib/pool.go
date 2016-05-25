@@ -14,6 +14,7 @@ const (
 	POOL_STATUS_RUNNING
 )
 
+//TODO pool automatic resize if needed
 type Pool struct {
 	//worker pool
 	Workers       []Worker
