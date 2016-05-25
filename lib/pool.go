@@ -119,11 +119,11 @@ func (p *Pool) Run() {
 		p.wg.Add(1)
 		//env.GetLogger().Println(worker.GetWorkerName()+" ...")
 
-		//TODO Here has an error Mode if run in anonymous func, worker started is not in expected mode
-		go func() {
+		//fixed: Here has an error Mode if run in anonymous func, worker started is not in expected mode
+		go func(worker Worker) {
 			worker.Run()
 			p.wg.Done()
-		}()
+		}(worker)
 	}
 
 	// wait for all done worker.Run() / worker.Subscribe()
@@ -152,10 +152,10 @@ func (p *Pool) Send(task *Task, finish chan int) {
 
 	for _, worker := range p.Workers {
 		p.sendWg.Add(1)
-		go func() {
+		go func(worker Worker) {
 			worker.Subscribe(task)
 			p.sendWg.Done()
-		}()
+		}(worker)
 	}
 
 	p.sendWg.Wait()
