@@ -47,43 +47,43 @@ func NewWorker(env *EnvInfo) (*Worker, error) {
 }
 
 // this is a goroutine run
-func (p *Worker) Run() {
-	env.GetLogger().Println(p.GetWorkerName() + " started, wait for push task...")
+func (w *Worker) Run() {
+	env.GetLogger().Println(w.GetWorkerName() + " started, wait for push task...")
 	for {
 		select {
 		// need transfer by copy
-		case request := <-p.PushChannel:
+		case request := <-w.PushChannel:
 			if request == nil || request.Cmd == lib.WORKER_COMMAND_STOP {
-				env.GetLogger().Println(p.GetWorkerName() + " receive terminate channel signal, will quit.")
+				env.GetLogger().Println(w.GetWorkerName() + " receive terminate channel signal, will quit.")
 				break
 			}else {
 				//return response
-				resp := p.Push(request.Message, request.Device)
-				p.ResponseChannel <- resp
+				resp := w.Push(request.Message, request.Device)
+				w.ResponseChannel <- resp
 			}
 		}
 	}
 }
 
 // this a goroutine run
-func (p *Worker) Subscribe(task *lib.Task) {
-	env.GetLogger().Println(p.GetWorkerName() + " started to Subscribe...")
+func (w *Worker) Subscribe(task *lib.Task) {
+	env.GetLogger().Println(w.GetWorkerName() + " started to Subscribe...")
 	for {
 		DeviceToken, more := <-task.GetList().Channel
 		if more {
 			request := lib.NewWorkerRequeset(task.GetMessage(), DeviceToken, lib.WORKER_COMMAND_SEND)
-			p.PushChannel <- request
+			w.PushChannel <- request
 
 			//finish
-			<-p.ResponseChannel
+			<-w.ResponseChannel
 		}else {
 			break
 		}
 	}
 }
 
-func (p *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerResponse) {
-	p.Lock.Lock()
+func (w *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerResponse) {
+	w.Lock.Lock()
 
 	msgLocal := &apns.Notification{}
 	msgLocal.DeviceToken = Device
@@ -109,16 +109,16 @@ func (p *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 	msgLocal.Payload = load
 
 	// working now
-	p.Status = lib.WORKER_STATUS_RUNNING
+	w.Status = lib.WORKER_STATUS_RUNNING
 
-	env.GetLogger().Println(p.GetWorkerName() + " #start# to push for DeviceToken: " + msgLocal.DeviceToken)
+	env.GetLogger().Println(w.GetWorkerName() + " #start# to push for DeviceToken: " + msgLocal.DeviceToken)
 	start := time.Now().UnixNano()
 
-	resp, err := p.Client.Push(msgLocal)
+	resp, err := w.Client.Push(msgLocal)
 	if err != nil {
-		errMsg := p.GetWorkerName() + " Error while worker.Push():" + err.Error()
+		errMsg := w.GetWorkerName() + " Error while worker.Push():" + err.Error()
 		env.GetLogger().Println(errMsg)
-		p.Pool.GetFailLogger().Println(p.GetWorkerName() + " " + msgLocal.DeviceToken)
+		w.Pool.GetFailLogger().Println(w.GetWorkerName() + " " + msgLocal.DeviceToken)
 		return &lib.WorkerResponse{Response:nil, Error:errors.New(errMsg)}
 	}
 
@@ -126,34 +126,34 @@ func (p *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 	timeSpent := (time.Now().UnixNano() - start) / 1000
 	//success
 	if resp.Sent() {
-		env.GetLogger().Println(p.GetWorkerName() + " sent #success#: " + msgLocal.DeviceToken + " -> " + resp.ApnsID)
-		p.Pool.GetOKLogger().Println(p.GetWorkerName() + " " + msgLocal.DeviceToken + " -> " + resp.ApnsID + " -> " + strconv.Itoa(int(timeSpent)) + "us")
+		env.GetLogger().Println(w.GetWorkerName() + " sent #success#: " + msgLocal.DeviceToken + " -> " + resp.ApnsID)
+		w.Pool.GetOKLogger().Println(w.GetWorkerName() + " " + msgLocal.DeviceToken + " -> " + resp.ApnsID + " -> " + strconv.Itoa(int(timeSpent)) + "us")
 	}else {
-		env.GetLogger().Println(p.GetWorkerName() + " sent #faild#: " + msgLocal.DeviceToken + " -> " + resp.Reason)
-		p.Pool.GetFailLogger().Println(p.GetWorkerName() + " " + msgLocal.DeviceToken + " -> " + strconv.Itoa(resp.StatusCode) + " -> " + resp.Reason + " -> " + strconv.Itoa(int(timeSpent)) + "us -> " + resp.Timestamp.Format(time.RFC3339))
+		env.GetLogger().Println(w.GetWorkerName() + " sent #faild#: " + msgLocal.DeviceToken + " -> " + resp.Reason)
+		w.Pool.GetFailLogger().Println(w.GetWorkerName() + " " + msgLocal.DeviceToken + " -> " + strconv.Itoa(resp.StatusCode) + " -> " + resp.Reason + " -> " + strconv.Itoa(int(timeSpent)) + "us -> " + resp.Timestamp.Format(time.RFC3339))
 	}
 
-	p.Lock.Unlock()
-	p.Status = lib.WORKER_STATUS_SPARE
+	w.Lock.Unlock()
+	w.Status = lib.WORKER_STATUS_SPARE
 
 	return &lib.WorkerResponse{Response:resp, Error:err}
 }
 
-func (p *Worker) GetWorkerName() (string) {
-	return "pool_" + strconv.Itoa(p.Pool.PoolID) + "_worker_" + strconv.Itoa(p.WorkerID)
+func (w *Worker) GetWorkerName() (string) {
+	return "pool_" + strconv.Itoa(w.Pool.PoolID) + "_worker_" + strconv.Itoa(w.WorkerID)
 }
 
-func (p *Worker) SetWorkerID(id int) (bool) {
-	p.WorkerID = id
+func (w *Worker) SetWorkerID(id int) (bool) {
+	w.WorkerID = id
 	return true
 }
 
-func (p *Worker) SetPool(pool *lib.Pool) (bool) {
-	p.Pool = pool
+func (w *Worker) SetPool(pool *lib.Pool) (bool) {
+	w.Pool = pool
 	return true
 }
 
-func (p *Worker) Destroy() (error) {
+func (w *Worker) Destroy() (error) {
 
 	return nil
 }
