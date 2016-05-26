@@ -12,6 +12,7 @@ func NewQueueBuilder(q string, d []string) (*QueueBuilder) {
 	return &QueueBuilder{QueueName:q, DeviceIDs:d}
 }
 
+// need to be async mode
 func (q*QueueBuilder) ToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 	queue := NewQueueByCapacity(Capacity)
 
