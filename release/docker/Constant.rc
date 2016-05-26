@@ -1,0 +1,17 @@
+# docker 下载地址
+Registry=registry.alishui.com
+
+# docker 构建需要映射的目录
+VolumePath=/Users/bruce/
+
+# 工程目录
+ProjectPath=/Users/bruce/project/godev/src/gopush
+
+# Go语言的docker构建镜像
+ImageBuild="haimi:go-docker-dev"
+
+# Version now.
+Version=1.0.0
+
+# File server for download
+FileServer=/Users/bruce/ssd/software/docker-source/tmp
