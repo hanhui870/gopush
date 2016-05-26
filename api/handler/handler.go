@@ -30,6 +30,7 @@ func NewPushApi(server lib.Server) *PushApi {
 //		custom: json string, map[string][string], eg. custom={"payload": "haimi-590"}
 //		sound: notification sound
 //		queue: send queue, empty will use default all users.
+//			depends on runtime/config/config.ini queue.method value, file, sql, api has different meanings.
 //		deviceids: Send to specified id, not required. delimited by ","
 func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	formatNormalResponceHeader(w)
