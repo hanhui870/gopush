@@ -21,7 +21,8 @@ const (
 	POOL_DEFAULT_MAXSPARE = 50
 )
 
-//TODO pool automatic resize if needed
+//pool automatic resize if needed
+//TODO can use workers globally for connection saving.
 type Pool struct {
 	//worker pool
 	Workers    []Worker
@@ -77,28 +78,10 @@ func NewPool(Size, Capacity, MiniSpare, MaxSpare int, Env EnvInfo) (*Pool, error
 }
 
 func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
-	workers := make([]Worker, config.Size, config.Capacity)
-
 	pool := &Pool{Config:config}
-
-	for iter, _ := range workers {
-		worker, err := Env.CreateWorker()
-		if err != nil {
-			return nil, err
-		}
-
-		//不能用append, 会增长数组.
-		//workers=append(workers, worker)
-		//start from 0
-		worker.SetWorkerID(iter)
-
-		worker.SetPool(pool)
-
-		workers[iter] = worker
-	}
-
-	pool.Workers = workers
 	pool.Env = Env
+
+	pool.initWorkers(pool.Config.Size)
 
 	//run when created.
 	go pool.Run()
@@ -106,7 +89,45 @@ func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
 	return pool, nil
 }
 
-func (p *Pool) initWorkers() Worker {
+func (p *Pool) initWorkers(NewCount int) error {
+	oldWorkers := p.Workers
+	workers := make([]Worker, p.Config.Size, p.Config.Capacity)
+
+	for iter, _ := range workers {
+		var worker Worker
+		var err error
+
+		//fetch old and reuse worker, length compare
+		if oldWorkers != nil && len(oldWorkers) <= iter + 1 {
+			worker = oldWorkers[iter]
+		}else {
+			worker, err = p.Env.CreateWorker()
+			if err != nil {
+				return err
+			}
+		}
+
+
+		//不能用append, 会增长数组.
+		//workers=append(workers, worker)
+		//start from 0
+		worker.SetWorkerID(iter)
+		worker.SetPool(p)
+
+		workers[iter] = worker
+	}
+
+	// need to destroy old workers
+	if len(oldWorkers) > len(workers) {
+		iter := len(workers) - 1
+		for ; iter < len(oldWorkers); iter++ {
+			//trigger action
+			oldWorkers[iter].Destroy()
+		}
+	}
+
+	p.Workers = workers
+
 	return nil
 }
 
@@ -190,6 +211,9 @@ func (p *Pool) GetTask() (*Task) {
 
 //Resize pool worker pools
 func (p *Pool) Resize(size int) (error) {
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
 	pCfgNew := &(*p.Config)
 
 	pCfgNew.SetSizeByQueueLength(size)
@@ -207,22 +231,16 @@ func (p *Pool) Resize(size int) (error) {
 
 //can add when running
 func (p *Pool) expand(size int) (error) {
-	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
-	return nil
+	return p.initWorkers(size)
 }
 
-//TODO can not harvest when running
+//can not harvest when running
 func (p *Pool) harvest(size int) (error) {
-	p.Lock.Lock()
-	defer p.Lock.Unlock()
-
 	if p.Status == POOL_STATUS_RUNNING {
 		return errors.New("Pool can't add worker when running.")
 	}
 
-	return nil
+	return p.initWorkers(size)
 }
 
 func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) {
