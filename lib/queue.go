@@ -76,6 +76,7 @@ func (q *DeviceQueue) AppendFileDataSource(filename string) error {
 	}
 
 	list := bytes.Split(content, []byte("\n"))
+
 	for key, value := range list {
 		//least string conversion
 		err := q.appendInternalData(key, string(value))
@@ -103,8 +104,14 @@ func (q *DeviceQueue) AppendDataSource(list []string) error {
 
 func (q *DeviceQueue) appendInternalData(key int, value string) error {
 	value = strings.Trim(value, "\n\r ")
+
+
+	//TODO different platfrom device token length is different
 	if len(value) == 64 {
 		q.data = append(q.data, value)
+	}else if len(value) == 0 {
+		//may last line
+		return nil
 	}else {
 		return errors.New("DeviceQueue.appendInternalData() error device token length: line " + strconv.Itoa(key + 1) + " -> " + value)
 	}

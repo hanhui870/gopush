@@ -36,6 +36,8 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	formatNormalResponceHeader(w)
 	r.ParseForm()
 
+	api.server.GetEnv().GetLogger().Println("Receive request: ", r.Form)
+
 	if r.Method != lib.HTTP_METHOD_POST {
 		api.OutputResponse(w, &Response{Error:true, Message:"HTTP method POST is required.", Code:API_CODE_POST_NEEDED})
 		return
@@ -131,6 +133,7 @@ func (api *PushApi) OutputResponse(w http.ResponseWriter, resp interface{}) {
 	resp, err := api.FormatResponseJson(resp)
 	if err == nil {
 		fmt.Fprintln(w, resp)
+		api.server.GetEnv().GetLogger().Println("Resp:", resp)
 	}else {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, http.StatusText(http.StatusInternalServerError))
