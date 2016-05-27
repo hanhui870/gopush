@@ -93,13 +93,8 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom, Uuid:uuid.NewV1().String()}
 
 	qb := lib.NewQueueBuilder(queue, deviceids)
-	devicequeue, err := qb.ToDeviceQueue(api.server.GetEnv().GetPoolConfig().Capacity)
-	if err != nil {
-		api.OutputResponse(w, &Response{Error:true, Message:"Build send queue failed:" + err.Error(), Code:API_CODE_QUEUE_BUILD})
-		return
-	}
 
-	position, err := api.server.GetTaskQueue().Add(devicequeue, msg)
+	position, err := api.server.GetTaskQueue().AddByQueueBuilder(qb, msg, api.server)
 	if err != nil {
 		api.OutputResponse(w, &Response{Error:true, Message:"Add to taskqueue error:" + err.Error(), Code:API_CODE_TASK_ERROR})
 		return
@@ -112,6 +107,7 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	resp.Error = false
 	resp.Message = "Sent:" + msg.Uuid + " Position:" + strconv.Itoa(position)
 	resp.Code = API_CODE_OK
+
 	api.OutputResponse(w, resp)
 	return
 }

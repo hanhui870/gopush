@@ -100,7 +100,7 @@ func (w *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 		haimiPayloadKey := "payload"
 		if haimiPayload, ok := msg.GetCustom()[haimiPayloadKey]; ok {
 			if len(haimiPayload) > 0 {
-				load.Custom(haimiPayloadKey, "haimi-590")
+				load.Custom(haimiPayloadKey, msg.GetCustom()[haimiPayloadKey])
 			}
 		}
 	}
