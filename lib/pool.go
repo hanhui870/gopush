@@ -106,7 +106,7 @@ func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
 	return pool, nil
 }
 
-func (p *Pool) FetchASpareWork() Worker {
+func (p *Pool) initWorkers() Worker {
 	return nil
 }
 
@@ -188,13 +188,23 @@ func (p *Pool) GetTask() (*Task) {
 	return p.task
 }
 
-//TODO Resize pool worker pools
+//Resize pool worker pools
 func (p *Pool) Resize(size int) (error) {
+	pCfgNew := &(*p.Config)
+
+	pCfgNew.SetSizeByQueueLength(size)
+
+	//new<old
+	if pCfgNew.Size < p.Config.Size {
+		return p.harvest(pCfgNew.Size)
+
+	}else if pCfgNew.Size > p.Config.Size {
+		return p.expand(pCfgNew.Size)
+	}
 
 	return nil
 }
 
-//TODO add more workers
 //can add when running
 func (p *Pool) expand(size int) (error) {
 	p.Lock.Lock()
@@ -203,8 +213,7 @@ func (p *Pool) expand(size int) (error) {
 	return nil
 }
 
-//TODO harvest workers
-//can not harvest when running
+//TODO can not harvest when running
 func (p *Pool) harvest(size int) (error) {
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
