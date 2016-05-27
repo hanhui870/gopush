@@ -170,6 +170,7 @@ func (tq *TaskQueue) publish() {
 			var poolSelected *Pool
 			pool := tq.getSparePool()
 			if pool != nil {
+				//TODO Pool resize action
 				poolSelected = pool
 			}else {
 				for iter, pool := range tq.pools {

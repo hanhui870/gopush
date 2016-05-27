@@ -253,13 +253,15 @@ func (pc *PoolConfig) SetSizeByQueueLength(length int) {
 	if length <= 10 {
 		pc.Size = pc.MiniSpare
 	}else if length <= 100 {
-		pc.Size = pc.MiniSpare * 2
-	}else if length <= 1000 {
 		pc.Size = pc.MiniSpare * 5
 	}else if length <= 1000 {
 		pc.Size = pc.MiniSpare * 10
 	}else if length <= 10000 {
 		pc.Size = pc.MiniSpare * 50
+	}else if length <= 100000 {
+		pc.Size = pc.MiniSpare * 100
+	}else if length <= 500000 {
+		pc.Size = pc.MiniSpare * 150
 	}else {
 		pc.Size = pc.Capacity
 	}
