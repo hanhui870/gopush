@@ -107,13 +107,12 @@ func (tq *TaskQueue)Add(list *DeviceQueue, msg MessageInterface) (int, error) {
 
 // add a new task
 func (tq *TaskQueue)AddByQueueBuilder(qb *QueueBuilder, msg MessageInterface, server Server) (int, error) {
-	tq.Lock.Lock()
-	defer tq.Lock.Unlock()
-
 	devicequeue, err := qb.AsyncToDeviceQueue(server.GetEnv().GetPoolConfig().Capacity)
 	if err != nil {
 		return 0, err
 	}
+
+	// will fetch lock
 	return tq.Add(devicequeue, msg)
 }
 
