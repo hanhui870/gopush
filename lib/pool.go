@@ -22,7 +22,7 @@ const (
 )
 
 //pool automatic resize if needed
-//TODO can use workers globally for connection saving.
+//TODO can use workers globally for connection saving. @see initWorkers()
 type Pool struct {
 	//worker pool
 	Workers    []Worker
@@ -118,6 +118,7 @@ func (p *Pool) initWorkers(NewCount int) error {
 	}
 
 	// need to destroy old workers
+	// TODO This workers can be reusable, but have to related to Env for multi certs.
 	if len(oldWorkers) > len(workers) {
 		iter := len(workers) - 1
 		for ; iter < len(oldWorkers); iter++ {
