@@ -20,6 +20,8 @@ type EnvInfo struct {
 	CertPassword string
 
 	PoolConfig   *lib.PoolConfig
+
+	QueueSourceConfig *lib.QueueSourceConfig
 }
 
 func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
@@ -45,6 +47,32 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	if env.CertPassword == "" {
 		log.Fatalln("Config of " + keyNow + " is empty.")
 	}
+
+	qsConfig:=&lib.QueueSourceConfig{}
+	keyNow = "queue.method"
+	tmpStr := config.GetValueString(keyNow, sec, c)
+	if tmpStr == "" {
+		log.Fatalln("Config of " + keyNow + " is empty.")
+	}
+	if tmpStr!=lib.QUEUE_SOURCE_METHOD_API && tmpStr!=lib.QUEUE_SOURCE_METHOD_FILE && tmpStr!=lib.QUEUE_SOURCE_METHOD_MYSQL {
+		log.Fatalln("Config of " + keyNow + " value is not allowed: "+tmpStr)
+	}
+	qsConfig.Method=tmpStr
+
+	keyNow = "queue.mysql.dsn"
+	tmpStr = config.GetValueString(keyNow, sec, c)
+	if tmpStr == "" {
+		log.Fatalln("Config of " + keyNow + " is empty.")
+	}
+	qsConfig.MysqlDsn=tmpStr
+
+	keyNow = "queue.api.uri"
+	tmpStr = config.GetValueString(keyNow, sec, c)
+	if tmpStr == "" {
+		log.Fatalln("Config of " + keyNow + " is empty.")
+	}
+	qsConfig.ApiUri=tmpStr
+	env.QueueSourceConfig=qsConfig
 
 	//create uuid
 	env.CreateUUID()
@@ -73,4 +101,8 @@ func (p *EnvInfo) DestroyWorker(worker lib.Worker) (error) {
 
 func (p *EnvInfo) GetPoolConfig() (*lib.PoolConfig) {
 	return p.PoolConfig
+}
+
+func (p *EnvInfo) GetQueueSourceConfig() (*lib.QueueSourceConfig){
+	return p.QueueSourceConfig
 }

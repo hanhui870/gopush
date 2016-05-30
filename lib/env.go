@@ -14,4 +14,6 @@ type EnvInfo interface {
 	DestroyWorker(worker Worker) (error)
 
 	GetPoolConfig() (*PoolConfig)
+
+	GetQueueSourceConfig() (*QueueSourceConfig)
 }
