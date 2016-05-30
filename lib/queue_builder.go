@@ -34,9 +34,6 @@ func (q *QueueBuilder) AsyncToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 }
 
 func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
-	//close when finish
-	queue.EnableCloseAfterSended()
-
 	if q.QueueName != "" {
 		err := queue.AppendFileDataSource("runtime/data/" + q.QueueName + ".txt")
 		if err != nil {
@@ -52,5 +49,8 @@ func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 	}
 
 	queue.SetStatus(DEVICE_QUEUE_STATUS_SUSPEND)
+
+	//close when finish, need to after add data or will finish without sending
+	queue.EnableCloseAfterSended()
 	return nil
 }
