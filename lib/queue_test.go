@@ -8,7 +8,7 @@ import (
 )
 
 func TestMuiltWriterLogger(t *testing.T) {
-	q := NewQueue()
+	q := NewQueue(nil)
 	if cap(q.Channel) != QUEUE_DEFAULT_CAPACITY {
 		t.Error("len(q.Channel)!=QUEUE_DEFAULT_CAPACITY")
 	}

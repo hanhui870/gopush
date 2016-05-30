@@ -7,7 +7,7 @@ import (
 )
 
 func TestTaskQueueCycleOperation(t *testing.T) {
-	tq := &TaskQueue{tasks:make([]*Task, 5)}
+	tq := &TaskQueue{tasks:make([]*Task, 5),taskChangeChannel:make(chan bool, TASK_QUEUE_MAX_WAITING)}
 
 	pos, err := tq.Add(&DeviceQueue{Position:1}, nil)
 	if err != nil {
