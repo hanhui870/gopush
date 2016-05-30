@@ -85,14 +85,19 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 	str, err = GetParamString(r, "deviceids")
 	var deviceids []string
 	if err == nil {
-		deviceids = strings.Split(str, DEVICEID_SEP)
+		tmp := strings.Split(str, DEVICEID_SEP)
+		for _, strTmp := range tmp {
+			if len(strTmp)>0 {
+				deviceids=append(deviceids, strTmp)
+			}
+		}
 	}else {
 		deviceids = nil
 	}
 
 	//V1 error: uuid.State.init error: binary.Read: invalid type uuid.Sequence
 	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom, Uuid:uuid.NewV4().String()}
-	qb := lib.NewQueueBuilder(queue, deviceids)
+	qb := lib.NewQueueBuilder(queue, deviceids, api.server)
 
 	position, err := api.server.GetTaskQueue().AddByQueueBuilder(qb, msg, api.server)
 	if err != nil {
