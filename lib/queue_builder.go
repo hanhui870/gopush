@@ -16,7 +16,7 @@ func NewQueueBuilder(q string, d []string, server Server) (*QueueBuilder) {
 }
 
 func (q *QueueBuilder) ToDeviceQueue(Capacity int) (*DeviceQueue, error) {
-	queue := NewQueueByCapacity(Capacity)
+	queue := NewQueueByCapacity(Capacity, q.server)
 
 	err := q.processData(queue)
 	if err != nil {
@@ -28,7 +28,7 @@ func (q *QueueBuilder) ToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 
 // async mode device queue
 func (q *QueueBuilder) AsyncToDeviceQueue(Capacity int) (*DeviceQueue, error) {
-	queue := NewQueueByCapacity(Capacity)
+	queue := NewQueueByCapacity(Capacity, q.server)
 
 	//async process data
 	go q.processData(queue)

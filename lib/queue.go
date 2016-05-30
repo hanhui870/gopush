@@ -16,79 +16,103 @@ import (
 const (
 	QUEUE_DEFAULT_CAPACITY = 50
 
-//init
+	//init
 	DEVICE_QUEUE_STATUS_INIT = "init"
-//ready for sending
+	//ready for sending
 	DEVICE_QUEUE_STATUS_PENDING = "pending"
-//suspend sending
+	//suspend sending
 	DEVICE_QUEUE_STATUS_SUSPEND = "suspend"
-//finish sending
+	//finish sending
 	DEVICE_QUEUE_STATUS_FINISH = "finish"
 )
 
 type DeviceQueue struct {
 	//channel is a synchronization
-	Channel     chan string
+	Channel            chan string
 
 	//发送文件位置
-	Position    int
+	Position           int
 
-	data        []string
+	data               []string
 	//data locker
-	lock        sync.Mutex
+	lock               sync.Mutex
 
-	status      string
+	status             string
 	queueChangeChannel chan bool
 
 	//if false can append queue after finish sending
-	CloseAfterSended bool
+	CloseAfterSended   bool
+
+	//logger
+	server             Server
 }
 
-func NewQueueByPool(p *Pool) (*DeviceQueue) {
+func NewQueueByPool(p *Pool, server Server) (*DeviceQueue) {
 	//2 times of pool capacity
-	return NewQueueByCapacity(p.Config.Capacity * 2)
+	return NewQueueByCapacity(p.Config.Capacity * 2, server)
 }
 
-func NewQueueByCapacity(Capacity int) (*DeviceQueue) {
+func NewQueueByCapacity(Capacity int, server Server) (*DeviceQueue) {
 	//Capacity equal to pool
 	chanCreate := make(chan string, Capacity)
 
-	return &DeviceQueue{Channel:chanCreate, Position:0, status:DEVICE_QUEUE_STATUS_INIT, queueChangeChannel:make(chan bool, Capacity), CloseAfterSended:false}
+	return &DeviceQueue{Channel:chanCreate, Position:0, status:DEVICE_QUEUE_STATUS_INIT, queueChangeChannel:make(chan bool, Capacity), CloseAfterSended:false, server:server}
 }
 
-func NewQueue() (*DeviceQueue) {
-	return NewQueueByCapacity(QUEUE_DEFAULT_CAPACITY)
+func NewQueue(server Server) (*DeviceQueue) {
+	return NewQueueByCapacity(QUEUE_DEFAULT_CAPACITY, server)
 }
 
 //publish goroutine
 //if status equal to init or suspend will block until data ready
 func (q *DeviceQueue) Publish() {
+	q.server.GetEnv().GetLogger().Println("DeviceQueue status is " + q.status + ", publish now...")
+
 	for {
-		for {
-			if q.status == DEVICE_QUEUE_STATUS_INIT || q.status == DEVICE_QUEUE_STATUS_SUSPEND {
+		if q.status == DEVICE_QUEUE_STATUS_INIT || q.status == DEVICE_QUEUE_STATUS_SUSPEND {
+			for {
+				q.server.GetEnv().GetLogger().Println("DeviceQueue status is " + q.status + ", will block q.queueChangeChannel...")
+
+				//block
 				<-q.queueChangeChannel
+
+				if q.status != DEVICE_QUEUE_STATUS_INIT && q.status != DEVICE_QUEUE_STATUS_SUSPEND {
+					q.server.GetEnv().GetLogger().Println("DeviceQueue status is " + q.status + ", will break wait for work.")
+					//need to break loop
+					break
+				}
 			}
 		}
 
-		// add a critical lock
-		q.lock.Lock()
-		//Pending need seding
-		if q.status == DEVICE_QUEUE_STATUS_PENDING && q.Position < len(q.data) {
-			q.Channel <- q.data[q.Position]
-			q.Position++
-		}else {
-			if q.CloseAfterSended {
-				//finish seding
-				q.status = DEVICE_QUEUE_STATUS_FINISH
-			}
+		//publish actual action
+		q.sendToChannel()
 
-			if q.status == DEVICE_QUEUE_STATUS_FINISH {
-				//finish work
-				close(q.Channel)
-				break
-			}
+		//finish work
+		if q.status == DEVICE_QUEUE_STATUS_FINISH {
+			break
 		}
-		q.lock.Unlock()
+	}
+}
+
+func (q *DeviceQueue) sendToChannel() {
+	// add a critical lock
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	//Pending need seding
+	if q.status == DEVICE_QUEUE_STATUS_PENDING && q.Position < len(q.data) {
+		q.Channel <- q.data[q.Position]
+		q.Position++
+	} else {
+		if q.CloseAfterSended {
+			//finish seding
+			q.status = DEVICE_QUEUE_STATUS_FINISH
+		}
+
+		if q.status == DEVICE_QUEUE_STATUS_FINISH {
+			//finish work
+			close(q.Channel)
+		}
 	}
 }
 
@@ -106,7 +130,6 @@ func (q *DeviceQueue) DisableCloseAfterSended() {
 	q.CloseAfterSended = false
 }
 
-
 func (q *DeviceQueue) TriggerChange() {
 	q.queueChangeChannel <- true
 }
@@ -122,34 +145,34 @@ func (q *DeviceQueue) SetStatus(status string) (bool, error) {
 	if q.status == DEVICE_QUEUE_STATUS_INIT {
 		if status != DEVICE_QUEUE_STATUS_PENDING {
 			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
-		}else {
+		} else {
 			q.status = status
 		}
 
-	}else if q.status == DEVICE_QUEUE_STATUS_PENDING {
+	} else if q.status == DEVICE_QUEUE_STATUS_PENDING {
 		if status == DEVICE_QUEUE_STATUS_SUSPEND || status == DEVICE_QUEUE_STATUS_FINISH {
 			q.status = status
 
-		}else {
+		} else {
 			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
 		}
 
-	}else if q.status == DEVICE_QUEUE_STATUS_SUSPEND {
+	} else if q.status == DEVICE_QUEUE_STATUS_SUSPEND {
 		if status != DEVICE_QUEUE_STATUS_PENDING {
 			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
-		}else {
+		} else {
 			q.status = status
 		}
 
-	}else if q.status == DEVICE_QUEUE_STATUS_FINISH {
+	} else if q.status == DEVICE_QUEUE_STATUS_FINISH {
 		if status != DEVICE_QUEUE_STATUS_INIT {
 			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
-		}else {
+		} else {
 			q.status = status
 			//rewind pos
 			q.Position = 0
 		}
-	}else {
+	} else {
 		return false, errors.New("Not support DeviceQueue status code.")
 	}
 
@@ -218,14 +241,13 @@ func (q *DeviceQueue) AppendDataSource(list []string) error {
 func (q *DeviceQueue) appendInternalData(key int, value string) error {
 	value = strings.Trim(value, "\n\r ")
 
-
 	//TODO different platfrom device token length is different
 	if len(value) == 64 {
 		q.data = append(q.data, value)
-	}else if len(value) == 0 {
+	} else if len(value) == 0 {
 		//may last line
 		return nil
-	}else {
+	} else {
 		return errors.New("DeviceQueue.appendInternalData() error device token length: line " + strconv.Itoa(key + 1) + " -> " + value)
 	}
 	return nil
