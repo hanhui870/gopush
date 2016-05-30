@@ -6,10 +6,13 @@ type QueueBuilder struct {
 
 	//DeviceIDs for working, if not empty, will merge with queue
 	DeviceIDs []string
+
+	//logger
+	server Server
 }
 
-func NewQueueBuilder(q string, d []string) (*QueueBuilder) {
-	return &QueueBuilder{QueueName:q, DeviceIDs:d}
+func NewQueueBuilder(q string, d []string, server Server) (*QueueBuilder) {
+	return &QueueBuilder{QueueName:q, DeviceIDs:d, server:server}
 }
 
 func (q *QueueBuilder) ToDeviceQueue(Capacity int) (*DeviceQueue, error) {
@@ -35,20 +38,25 @@ func (q *QueueBuilder) AsyncToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 
 func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 	if q.QueueName != "" {
-		err := queue.AppendFileDataSource("runtime/data/" + q.QueueName + ".txt")
+		file:="runtime/data/" + q.QueueName + ".txt"
+
+		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from file: "+file)
+		err := queue.AppendFileDataSource(file)
 		if err != nil {
 			return err
 		}
 	}
 
-	if q.DeviceIDs != nil {
+	if q.DeviceIDs != nil && len(q.DeviceIDs)>0 {
+		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from DeviceIDs parameter.")
 		err := queue.AppendDataSource(q.DeviceIDs)
 		if err != nil {
 			return err
 		}
 	}
 
-	queue.SetStatus(DEVICE_QUEUE_STATUS_SUSPEND)
+	//send pending
+	queue.SetStatus(DEVICE_QUEUE_STATUS_PENDING)
 
 	//close when finish, need to after add data or will finish without sending
 	queue.EnableCloseAfterSended()
