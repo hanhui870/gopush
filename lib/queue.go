@@ -15,6 +15,15 @@ import (
 
 const (
 	QUEUE_DEFAULT_CAPACITY = 50
+
+//init
+	DEVICE_QUEUE_STATUS_INIT = "init"
+//ready for sending
+	DEVICE_QUEUE_STATUS_PENDING = "pending"
+//suspend sending
+	DEVICE_QUEUE_STATUS_SUSPEND = "suspend"
+//finish sending
+	DEVICE_QUEUE_STATUS_FINISH = "finish"
 )
 
 type DeviceQueue struct {
@@ -27,6 +36,12 @@ type DeviceQueue struct {
 	data        []string
 	//data locker
 	lock        sync.Mutex
+
+	status      string
+	queueChangeChannel chan bool
+
+	//if false can append queue after finish sending
+	CloseAfterSended bool
 }
 
 func NewQueueByPool(p *Pool) (*DeviceQueue) {
@@ -38,7 +53,7 @@ func NewQueueByCapacity(Capacity int) (*DeviceQueue) {
 	//Capacity equal to pool
 	chanCreate := make(chan string, Capacity)
 
-	return &DeviceQueue{Channel:chanCreate, Position:0}
+	return &DeviceQueue{Channel:chanCreate, Position:0, status:DEVICE_QUEUE_STATUS_INIT, queueChangeChannel:make(chan bool, Capacity), CloseAfterSended:false}
 }
 
 func NewQueue() (*DeviceQueue) {
@@ -48,15 +63,108 @@ func NewQueue() (*DeviceQueue) {
 //publish goroutine
 func (q *DeviceQueue) Publish() {
 	for {
-		if q.Position < len(q.data) {
+		for {
+			if q.status == DEVICE_QUEUE_STATUS_INIT || q.status == DEVICE_QUEUE_STATUS_SUSPEND {
+				<-q.queueChangeChannel
+			}
+		}
+
+		// add a critical lock
+		q.lock.Lock()
+		//Pending need seding
+		if q.status == DEVICE_QUEUE_STATUS_PENDING && q.Position < len(q.data) {
 			q.Channel <- q.data[q.Position]
 			q.Position++
 		}else {
-			//finish work
-			close(q.Channel)
-			break
+			if q.CloseAfterSended {
+				//finish seding
+				q.status = DEVICE_QUEUE_STATUS_FINISH
+			}
+
+			if q.status == DEVICE_QUEUE_STATUS_FINISH {
+				//finish work
+				close(q.Channel)
+				break
+			}
 		}
+		q.lock.Unlock()
 	}
+}
+
+func (q *DeviceQueue) EnableCloseAfterSended() {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	q.CloseAfterSended = true
+}
+
+func (q *DeviceQueue) DisableCloseAfterSended() {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	q.CloseAfterSended = false
+}
+
+
+func (q *DeviceQueue) TriggerChange() {
+	q.queueChangeChannel <- true
+}
+
+// Status
+// init->pending->finish(can goback to init)
+//        ⬇️⬆️
+//       suspend
+func (q *DeviceQueue) SetStatus(status string) (bool, error) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	if q.status == DEVICE_QUEUE_STATUS_INIT {
+		if status != DEVICE_QUEUE_STATUS_PENDING {
+			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
+		}else {
+			q.status = status
+		}
+
+	}else if q.status == DEVICE_QUEUE_STATUS_PENDING {
+		if status == DEVICE_QUEUE_STATUS_SUSPEND || status == DEVICE_QUEUE_STATUS_FINISH {
+			q.status = status
+
+		}else {
+			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
+		}
+
+	}else if q.status == DEVICE_QUEUE_STATUS_SUSPEND {
+		if status != DEVICE_QUEUE_STATUS_PENDING {
+			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
+		}else {
+			q.status = status
+		}
+
+	}else if q.status == DEVICE_QUEUE_STATUS_FINISH {
+		if status != DEVICE_QUEUE_STATUS_INIT {
+			return false, errors.New("Not allowed to set status to " + status + ", NOW: " + q.status)
+		}else {
+			q.status = status
+			//rewind pos
+			q.Position = 0
+		}
+	}else {
+		return false, errors.New("Not support DeviceQueue status code.")
+	}
+
+	q.TriggerChange()
+	return true, nil
+}
+
+func (q *DeviceQueue) ChangePosition(posNew int) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	if posNew < len(q.data) && posNew >= 0 {
+		q.Position = posNew
+	}
+
+	q.TriggerChange()
 }
 
 //publish goroutine
@@ -85,6 +193,8 @@ func (q *DeviceQueue) AppendFileDataSource(filename string) error {
 		}
 	}
 
+	q.TriggerChange()
+
 	return nil
 }
 
@@ -98,6 +208,8 @@ func (q *DeviceQueue) AppendDataSource(list []string) error {
 			return err
 		}
 	}
+
+	q.TriggerChange()
 
 	return nil
 }
