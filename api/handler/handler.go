@@ -90,8 +90,8 @@ func (api *PushApi) Send(w http.ResponseWriter, r *http.Request) {
 		deviceids = nil
 	}
 
-	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom, Uuid:uuid.NewV1().String()}
-
+	//V1 error: uuid.State.init error: binary.Read: invalid type uuid.Sequence
+	msg := &lib.Message{Title:title, Body:body, Sound:sound, Custom:custom, Uuid:uuid.NewV4().String()}
 	qb := lib.NewQueueBuilder(queue, deviceids)
 
 	position, err := api.server.GetTaskQueue().AddByQueueBuilder(qb, msg, api.server)
