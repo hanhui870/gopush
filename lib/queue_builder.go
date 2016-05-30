@@ -12,23 +12,43 @@ func NewQueueBuilder(q string, d []string) (*QueueBuilder) {
 	return &QueueBuilder{QueueName:q, DeviceIDs:d}
 }
 
-// need to be async mode
-func (q*QueueBuilder) ToDeviceQueue(Capacity int) (*DeviceQueue, error) {
+func (q *QueueBuilder) ToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 	queue := NewQueueByCapacity(Capacity)
 
+	err := q.processData(queue)
+	if err != nil {
+		return nil, err
+	}
+
+	return queue, nil
+}
+
+// async mode device queue
+func (q *QueueBuilder) AsyncToDeviceQueue(Capacity int) (*DeviceQueue, error) {
+	queue := NewQueueByCapacity(Capacity)
+
+	//async process data
+	go q.processData(queue)
+
+	return queue, nil
+}
+
+func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 	if q.QueueName != "" {
 		err := queue.AppendFileDataSource("runtime/data/" + q.QueueName + ".txt")
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	if q.DeviceIDs != nil {
 		err := queue.AppendDataSource(q.DeviceIDs)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return queue, nil
+	queue.SetStatus(DEVICE_QUEUE_STATUS_SUSPEND)
+
+	return nil
 }

@@ -110,7 +110,7 @@ func (tq *TaskQueue)AddByQueueBuilder(qb *QueueBuilder, msg MessageInterface, se
 	tq.Lock.Lock()
 	defer tq.Lock.Unlock()
 
-	devicequeue, err := qb.ToDeviceQueue(server.GetEnv().GetPoolConfig().Capacity)
+	devicequeue, err := qb.AsyncToDeviceQueue(server.GetEnv().GetPoolConfig().Capacity)
 	if err != nil {
 		return 0, err
 	}

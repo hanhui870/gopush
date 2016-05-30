@@ -61,6 +61,7 @@ func NewQueue() (*DeviceQueue) {
 }
 
 //publish goroutine
+//if status equal to init or suspend will block until data ready
 func (q *DeviceQueue) Publish() {
 	for {
 		for {
