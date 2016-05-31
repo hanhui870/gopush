@@ -148,10 +148,12 @@ func (qs *QueueSource) geneFileSouce() (list []string, err error) {
 	return list, nil
 }
 
+//TODO
 func (qs *QueueSource) Cache() (bool, error) {
 	return false, nil
 }
 
+//TODO
 func (qs *QueueSource) Update() (bool, error) {
 	return false, nil
 }
