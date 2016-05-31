@@ -1,8 +1,13 @@
+// Copyright 2016 祝景法(Bruce)@haimi.com. www.haimi.com All rights reserved.
 package lib
 
 import (
 	"errors"
 	"strings"
+
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+
 )
 
 const (
@@ -20,6 +25,8 @@ type QueueSourceConfig struct {
 	Method   string
 	//sql dsn config
 	MysqlDsn string
+	//ApiPrefix+value config
+	ApiPrefix string
 	//Value for specific method
 	Value string
 }
@@ -27,16 +34,9 @@ type QueueSourceConfig struct {
 // Construct a new QueueSource, need no pointer
 func NewQueueSource(queue string, config QueueSourceConfig) (*QueueSource, error) {
 	conNew:=&(config)
-	if conNew.Method==QUEUE_SOURCE_METHOD_API ||
-		conNew.Method==QUEUE_SOURCE_METHOD_MYSQL ||
-		conNew.Method==QUEUE_SOURCE_METHOD_FILE {
+	conNew.Value=queue
 
-		conNew.Value=queue
-	}else{
-		return nil, errors.New("Unsupport QueueSource method.")
-	}
-
-	return &QueueSource{config:conNew}, nil
+	return NewQueueSourceByConfig(conNew)
 }
 
 func NewQueueSourceByConfig(config *QueueSourceConfig) (*QueueSource, error) {
@@ -56,16 +56,66 @@ func NewQueueSourceByConfig(config *QueueSourceConfig) (*QueueSource, error) {
 
 
 //use cache first, update when needed
-func (qs *QueueSource) GetDeviceQueue() {
+func (qs *QueueSource) GetData()(list []string, err error) {
+	if qs.config.Method==QUEUE_SOURCE_METHOD_API{
+		list, err=qs.geneApiSouce()
+	}else if qs.config.Method==QUEUE_SOURCE_METHOD_MYSQL{
+		list, err=qs.geneMysqlSouce()
+	}else if qs.config.Method==QUEUE_SOURCE_METHOD_FILE{
+		list, err=qs.geneFileSouce()
+	}else{
+		return nil, errors.New("Unsupport QueueSource method.")
+	}
 
+	return
 }
 
-func (qs *QueueSource) Cache() {
+func (qs *QueueSource) geneMysqlSouce()(list []string, err error) {
+	db, err := sql.Open("mysql", qs.config.MysqlDsn)
+	if err != nil {
+		return nil, errors.New("Error when sql.Open(): "+err.Error())
+	}
+	defer db.Close()
 
+	var PushID string
+	var PushList []string
+	rows, err := db.Query(qs.config.Value)
+	if err != nil {
+		return nil, errors.New("Error when db.Query: "+err.Error())
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&PushID)
+		if err != nil {
+			return nil, errors.New("Error when rows.Scan(&PushID): "+err.Error())
+		}
+		PushList=append(PushList, PushID)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, errors.New("Error when rows.Err(): "+err.Error())
+	}
+
+	return PushList, nil
 }
 
-func (qs *QueueSource) Update() {
+func (qs *QueueSource) geneApiSouce()(list []string, err error) {
 
+
+	return
+}
+
+func (qs *QueueSource) geneFileSouce()(list []string, err error) {
+	return
+}
+
+func (qs *QueueSource) Cache() (bool, error){
+	return false, nil
+}
+
+func (qs *QueueSource) Update() (bool, error) {
+	return false, nil
 }
 
 

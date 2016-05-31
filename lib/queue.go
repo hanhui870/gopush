@@ -63,6 +63,11 @@ func NewQueue(server Server) (*DeviceQueue) {
 	return NewQueueByCapacity(QUEUE_DEFAULT_CAPACITY, server)
 }
 
+func NewQueueByServer(server Server) (*DeviceQueue) {
+	//2 times of pool capacity
+	return NewQueueByCapacity(server.GetEnv().GetPoolConfig().Capacity * 2, server)
+}
+
 //publish goroutine
 //if status equal to init or suspend will block until data ready
 func (q *DeviceQueue) Publish() {

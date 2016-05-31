@@ -65,6 +65,11 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 		if tmpStr == "" {
 			log.Fatalln("Config of " + keyNow + " is empty.")
 		}
+		qsConfig.ApiPrefix=tmpStr
+
+		//can be empty
+		keyNow = "queue.api.name"
+		tmpStr = config.GetValueString(keyNow, sec, c)
 		qsConfig.Value=tmpStr
 	}else if qsConfig.Method == lib.QUEUE_SOURCE_METHOD_MYSQL {
 		keyNow = "queue.mysql.dsn"
@@ -74,11 +79,9 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 		}
 		qsConfig.MysqlDsn=tmpStr
 
+		//can be empty
 		keyNow = "queue.mysql.sql"
 		tmpStr = config.GetValueString(keyNow, sec, c)
-		if tmpStr == "" {
-			log.Fatalln("Config of " + keyNow + " is empty.")
-		}
 		qsConfig.Value=tmpStr
 	}
 	//set qsconfig
