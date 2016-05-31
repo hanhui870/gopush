@@ -47,10 +47,10 @@ func Bootstrap(c *cli.Context) {
 
 	env.GetLogger().Println("GoPush queue.method:", env.QueueSourceConfig.Method)
 	if env.QueueSourceConfig.Method==lib.QUEUE_SOURCE_METHOD_API {
-		env.GetLogger().Println("GoPush queue.api.uri:", env.QueueSourceConfig.ApiUri)
+		env.GetLogger().Println("GoPush queue.api.uri:", env.QueueSourceConfig.Value)
 	}else if env.QueueSourceConfig.Method==lib.QUEUE_SOURCE_METHOD_MYSQL {
 		env.GetLogger().Println("GoPush default queue.mysql.dsn:", env.QueueSourceConfig.MysqlDsn)
-		env.GetLogger().Println("GoPush default queue.mysql.sql:", env.QueueSourceConfig.MysqlSQL)
+		env.GetLogger().Println("GoPush default queue.mysql.sql:", env.QueueSourceConfig.Value)
 	}
 
 	// no need next
