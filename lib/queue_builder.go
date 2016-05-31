@@ -78,6 +78,14 @@ func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 		}
 	}
 
+	if len(queue.data)<=0 {
+		msg:="Error when qb.processData: No final device queue data available."
+		q.server.GetEnv().GetLogger().Println(msg)
+		return errors.New(msg)
+	}else{
+		q.server.GetEnv().GetLogger().Println("Queue data build finish, devices pending to send:", len(queue.data))
+	}
+
 	//send pending
 	queue.SetStatus(DEVICE_QUEUE_STATUS_PENDING)
 
