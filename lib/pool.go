@@ -91,7 +91,8 @@ func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
 
 func (p *Pool) initWorkers(NewCount int) error {
 	oldWorkers := p.Workers
-	workers := make([]Worker, p.Config.Size, p.Config.Capacity)
+	// initWorkers Need to use new count
+	workers := make([]Worker, NewCount, p.Config.Capacity)
 
 	for iter, _ := range workers {
 		var worker Worker
