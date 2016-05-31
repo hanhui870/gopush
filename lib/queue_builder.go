@@ -39,21 +39,32 @@ func (q *QueueBuilder) AsyncToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 }
 
 func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
+	//use default
+	if q.DeviceIDs==nil && q.QueueName == "" {
+		q.QueueName=q.server.GetEnv().GetQueueSourceConfig().Value
+	}
+
 	if q.QueueName != "" {
 		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from QueueSource: "+q.QueueName)
 
 		qs, err:=NewQueueSource(q.QueueName, *q.server.GetEnv().GetQueueSourceConfig())
 		if err != nil {
-			return errors.New("Error when NewQueueSource(): " + err.Error())
+			msg:="Error when NewQueueSource(): " + err.Error()
+			q.server.GetEnv().GetLogger().Println(msg)
+			return errors.New(msg)
 		}
 
 		data, err:=qs.GetData()
 		if err != nil {
-			return errors.New("Error when qs.GetData(): " + err.Error())
+			msg:="Error when qs.GetData(): " + err.Error()
+			q.server.GetEnv().GetLogger().Println(msg)
+			return errors.New(msg)
 		}
 		err = queue.AppendDataSource(data)
 		if err != nil {
-			return errors.New("Error when queue.AppendDataSource(): " + err.Error())
+			msg:="Error when queue.AppendDataSource(): " + err.Error()
+			q.server.GetEnv().GetLogger().Println(msg)
+			return errors.New(msg)
 		}
 	}
 
@@ -61,7 +72,9 @@ func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from DeviceIDs parameter.")
 		err := queue.AppendDataSource(q.DeviceIDs)
 		if err != nil {
-			return errors.New("Error when queue.AppendDataSource(): " + err.Error())
+			msg:="Error when queue.AppendDataSource(): " + err.Error()
+			q.server.GetEnv().GetLogger().Println(msg)
+			return errors.New(msg)
 		}
 	}
 
