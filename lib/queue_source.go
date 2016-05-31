@@ -15,6 +15,8 @@ type QueueSourceConfig struct {
 	Method   string
 	//sql dsn config
 	MysqlDsn string
+	//SQL for fetch device id
+	MysqlSQL string
 
 	ApiUri   string
 }

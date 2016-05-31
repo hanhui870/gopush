@@ -59,19 +59,29 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	}
 	qsConfig.Method=tmpStr
 
-	keyNow = "queue.mysql.dsn"
-	tmpStr = config.GetValueString(keyNow, sec, c)
-	if tmpStr == "" {
-		log.Fatalln("Config of " + keyNow + " is empty.")
-	}
-	qsConfig.MysqlDsn=tmpStr
+	if qsConfig.Method == lib.QUEUE_SOURCE_METHOD_API {
+		keyNow = "queue.api.uri"
+		tmpStr = config.GetValueString(keyNow, sec, c)
+		if tmpStr == "" {
+			log.Fatalln("Config of " + keyNow + " is empty.")
+		}
+		qsConfig.ApiUri=tmpStr
+	}else if qsConfig.Method == lib.QUEUE_SOURCE_METHOD_MYSQL {
+		keyNow = "queue.mysql.dsn"
+		tmpStr = config.GetValueString(keyNow, sec, c)
+		if tmpStr == "" {
+			log.Fatalln("Config of " + keyNow + " is empty.")
+		}
+		qsConfig.MysqlDsn=tmpStr
 
-	keyNow = "queue.api.uri"
-	tmpStr = config.GetValueString(keyNow, sec, c)
-	if tmpStr == "" {
-		log.Fatalln("Config of " + keyNow + " is empty.")
+		keyNow = "queue.mysql.sql"
+		tmpStr = config.GetValueString(keyNow, sec, c)
+		if tmpStr == "" {
+			log.Fatalln("Config of " + keyNow + " is empty.")
+		}
+		qsConfig.MysqlSQL=tmpStr
 	}
-	qsConfig.ApiUri=tmpStr
+	//set qsconfig
 	env.QueueSourceConfig=qsConfig
 
 	//create uuid

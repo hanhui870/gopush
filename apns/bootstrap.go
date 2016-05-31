@@ -45,6 +45,14 @@ func Bootstrap(c *cli.Context) {
 
 	env.PoolConfig = poolCfg
 
+	env.GetLogger().Println("GoPush queue.method:", env.QueueSourceConfig.Method)
+	if env.QueueSourceConfig.Method==lib.QUEUE_SOURCE_METHOD_API {
+		env.GetLogger().Println("GoPush queue.api.uri:", env.QueueSourceConfig.ApiUri)
+	}else if env.QueueSourceConfig.Method==lib.QUEUE_SOURCE_METHOD_MYSQL {
+		env.GetLogger().Println("GoPush default queue.mysql.dsn:", env.QueueSourceConfig.MysqlDsn)
+		env.GetLogger().Println("GoPush default queue.mysql.sql:", env.QueueSourceConfig.MysqlSQL)
+	}
+
 	// no need next
 	server := api.NewApiV1Server(env)
 	err = server.Start()
