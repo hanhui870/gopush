@@ -1,5 +1,7 @@
 package lib
 
+import "errors"
+
 type QueueBuilder struct {
 	//queue for working
 	QueueName string
@@ -38,12 +40,20 @@ func (q *QueueBuilder) AsyncToDeviceQueue(Capacity int) (*DeviceQueue, error) {
 
 func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 	if q.QueueName != "" {
-		file:="runtime/data/" + q.QueueName + ".txt"
+		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from QueueSource: "+q.QueueName)
 
-		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from file: "+file)
-		err := queue.AppendFileDataSource(file)
+		qs, err:=NewQueueSource(q.QueueName, *q.server.GetEnv().GetQueueSourceConfig())
 		if err != nil {
-			return err
+			return errors.New("Error when NewQueueSource(): " + err.Error())
+		}
+
+		data, err:=qs.GetData()
+		if err != nil {
+			return errors.New("Error when qs.GetData(): " + err.Error())
+		}
+		err = queue.AppendDataSource(data)
+		if err != nil {
+			return errors.New("Error when queue.AppendDataSource(): " + err.Error())
 		}
 	}
 
@@ -51,7 +61,7 @@ func (q *QueueBuilder) processData(queue *DeviceQueue) (error) {
 		q.server.GetEnv().GetLogger().Println("Init DeviceQueue data from DeviceIDs parameter.")
 		err := queue.AppendDataSource(q.DeviceIDs)
 		if err != nil {
-			return err
+			return errors.New("Error when queue.AppendDataSource(): " + err.Error())
 		}
 	}
 
