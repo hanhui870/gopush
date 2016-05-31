@@ -11,6 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"io/ioutil"
+	"net/http"
 )
 
 const (
@@ -114,8 +115,19 @@ func (qs *QueueSource) geneMysqlSouce() (list []string, err error) {
 }
 
 func (qs *QueueSource) geneApiSouce() (list []string, err error) {
+	url:=qs.config.ApiPrefix+qs.config.Value
+	resp, err:=http.Get(url)
+	if err != nil {
+		return nil, errors.New("Error when http.Get "+qs.config.ApiPrefix+qs.config.Value+": " + err.Error())
+	}
 
-	return
+	cb, err:=ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	list = strings.Split(strings.Trim(string(cb), QUEUE_SOURCE_SEPARATOR), QUEUE_SOURCE_SEPARATOR)
+
+	return list, nil
 }
 
 func (qs *QueueSource) geneFileSouce() (list []string, err error) {
@@ -131,7 +143,7 @@ func (qs *QueueSource) geneFileSouce() (list []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	list = strings.Split(string(cb), QUEUE_SOURCE_SEPARATOR)
+	list = strings.Split(strings.Trim(string(cb), QUEUE_SOURCE_SEPARATOR), QUEUE_SOURCE_SEPARATOR)
 
 	return list, nil
 }
