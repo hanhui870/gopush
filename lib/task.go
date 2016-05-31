@@ -177,7 +177,9 @@ func (tq *TaskQueue) publish() {
 				for iter, pool := range tq.pools {
 					if (pool == nil) {
 						//need a clone's pointer
-						config := &(*tq.server.GetEnv().GetPoolConfig())
+						cfgInstance:=*tq.server.GetEnv().GetPoolConfig()
+						config := &(cfgInstance)
+
 						config.SetSizeByQueueLength(task.list.Len())
 						pool, err = NewPoolByConfig(config, tq.server.GetEnv())
 						if err != nil {

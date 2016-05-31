@@ -215,7 +215,9 @@ func (p *Pool) Resize(size int) (error) {
 	p.Lock.Lock()
 	defer p.Lock.Unlock()
 
-	pCfgNew := &(*p.Config)
+	//need a clone's pointer
+	pCfg:=*p.Config
+	pCfgNew := &pCfg
 
 	pCfgNew.SetSizeByQueueLength(size)
 
