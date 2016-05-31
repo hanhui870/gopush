@@ -49,7 +49,7 @@ func TestQueueSourceApiTesting(t *testing.T) {
 }
 
 func TestQueueSourceFileTesting(t *testing.T) {
-	qscfg:=&QueueSourceConfig{Method:QUEUE_SOURCE_METHOD_FILE, Value:"queue"}
+	qscfg:=&QueueSourceConfig{Method:QUEUE_SOURCE_METHOD_FILE, FilePath:"/Users/bruce/project/godev/src/gopush/runtime/data/%s.txt", Value:"queue"}
 
 	qs, err:=NewQueueSourceByConfig(qscfg)
 	if err!=nil {
@@ -66,5 +66,4 @@ func TestQueueSourceFileTesting(t *testing.T) {
 			}
 		}
 	}
-
 }
