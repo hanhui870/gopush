@@ -59,6 +59,13 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	}
 	qsConfig.Method=tmpStr
 
+	keyNow = "queue.cache.path"
+	tmpStr = config.GetValueString(keyNow, sec, c)
+	if tmpStr == "" {
+		log.Fatalln("Config of " + keyNow + " is empty.")
+	}
+	qsConfig.CachePath=tmpStr
+
 	if qsConfig.Method == lib.QUEUE_SOURCE_METHOD_API {
 		keyNow = "queue.api.uri"
 		tmpStr = config.GetValueString(keyNow, sec, c)
@@ -68,7 +75,7 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 		qsConfig.ApiPrefix=tmpStr
 
 		//can be empty
-		keyNow = "queue.api.name"
+		keyNow = "queue.api.default"
 		tmpStr = config.GetValueString(keyNow, sec, c)
 		qsConfig.Value=tmpStr
 	}else if qsConfig.Method == lib.QUEUE_SOURCE_METHOD_MYSQL {
@@ -81,6 +88,18 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 
 		//can be empty
 		keyNow = "queue.mysql.sql"
+		tmpStr = config.GetValueString(keyNow, sec, c)
+		qsConfig.Value=tmpStr
+	}else if qsConfig.Method == lib.QUEUE_SOURCE_METHOD_FILE {
+		keyNow = "queue.file.path"
+		tmpStr = config.GetValueString(keyNow, sec, c)
+		if tmpStr == "" {
+			log.Fatalln("Config of " + keyNow + " is empty.")
+		}
+		qsConfig.FilePath=tmpStr
+
+		//can be empty
+		keyNow = "queue.file.default"
 		tmpStr = config.GetValueString(keyNow, sec, c)
 		qsConfig.Value=tmpStr
 	}

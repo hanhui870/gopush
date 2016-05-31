@@ -28,7 +28,7 @@ func TestQueueSourceMysqlTesting(t *testing.T) {
 
 func TestQueueSourceApiTesting(t *testing.T) {
 	//api queue test
-	qscfg:=&QueueSourceConfig{Method:QUEUE_SOURCE_METHOD_API, Value:"http://127.0.0.1:9998/test"}
+	qscfg:=&QueueSourceConfig{Method:QUEUE_SOURCE_METHOD_API, ApiPrefix:"http://127.0.0.1:9998/test?queue=", Value:"test"}
 
 	qs, err:=NewQueueSourceByConfig(qscfg)
 	if err!=nil {
@@ -43,14 +43,13 @@ func TestQueueSourceApiTesting(t *testing.T) {
 			}else{
 				t.Logf("Fetch data: %v", list)
 			}
-
 		}
 	}
 
 }
 
 func TestQueueSourceFileTesting(t *testing.T) {
-	qscfg:=&QueueSourceConfig{Method:QUEUE_SOURCE_METHOD_MYSQL, MysqlDsn:"root:@tcp(localhost:3306)/test?autocommit=true", Value:"select PushID from `device_tokens` group by PushID"}
+	qscfg:=&QueueSourceConfig{Method:QUEUE_SOURCE_METHOD_FILE, Value:"queue"}
 
 	qs, err:=NewQueueSourceByConfig(qscfg)
 	if err!=nil {
@@ -65,7 +64,6 @@ func TestQueueSourceFileTesting(t *testing.T) {
 			}else{
 				t.Logf("Fetch data: %v", list)
 			}
-
 		}
 	}
 
