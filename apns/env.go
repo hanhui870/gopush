@@ -18,6 +18,7 @@ type EnvInfo struct {
 
 	CertPath     string
 	CertPassword string
+	CertENV string
 
 	PoolConfig   *lib.PoolConfig
 
@@ -45,6 +46,12 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	keyNow = "cert.password"
 	env.CertPassword = config.GetValueString(keyNow, sec, c)
 	if env.CertPassword == "" {
+		log.Fatalln("Config of " + keyNow + " is empty.")
+	}
+
+	keyNow = "cert.env"
+	env.CertENV = config.GetValueString(keyNow, sec, c)
+	if env.CertENV == "" {
 		log.Fatalln("Config of " + keyNow + " is empty.")
 	}
 

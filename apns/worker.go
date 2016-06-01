@@ -15,6 +15,11 @@ import (
 	"gopush/lib"
 )
 
+const(
+	WORKER_ENV_DEVELOPMENT="development"
+	WORKER_ENV_PRODUCTION="production"
+)
+
 type Worker struct {
 	Client          *apns.Client
 	Status          int
@@ -40,7 +45,15 @@ func NewWorker(env *EnvInfo) (*Worker, error) {
 		return nil, err
 	}
 
-	client := apns.NewClient(cert).Production()
+	client := apns.NewClient(cert)
+	if env.CertENV==WORKER_ENV_PRODUCTION {
+		client.Production()
+	}else if env.CertENV==WORKER_ENV_DEVELOPMENT {
+		client.Development()
+	}else{
+		return nil, errors.New("Unsupport worker environment: "+env.CertENV)
+	}
+
 	worker := &Worker{Client:client, Status:lib.WORKER_STATUS_SPARE, PushChannel:make(chan *lib.WorkerRequeset), ResponseChannel:make(chan *lib.WorkerResponse)}
 
 	return worker, nil
