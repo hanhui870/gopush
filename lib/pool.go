@@ -121,13 +121,15 @@ func (p *Pool) initWorkers(NewCount int) error {
 	// need to destroy old workers
 	// TODO This workers can be reusable, but have to related to Env for multi certs.
 	if len(oldWorkers) > len(workers) {
-		iter := len(workers) - 1
+		iter := len(workers)//no need minus 1
 		for ; iter < len(oldWorkers); iter++ {
 			//trigger action
 			oldWorkers[iter].Destroy()
 		}
 	}
 
+	// edit new count
+	p.Config.Size=NewCount
 	p.Workers = workers
 
 	return nil
