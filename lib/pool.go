@@ -81,7 +81,10 @@ func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
 	pool := &Pool{Config:config}
 	pool.Env = Env
 
-	pool.initWorkers(pool.Config.Size)
+	err:=pool.initWorkers(pool.Config.Size)
+	if err!=nil {
+		return nil, errors.New("Error when NewPoolByConfig():" + err.Error())
+	}
 
 	//run when created.
 	go pool.Run()
