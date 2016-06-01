@@ -172,7 +172,10 @@ func (tq *TaskQueue) publish() {
 				poolSelected = pool
 
 				// Pool resize action
-				poolSelected.Resize(task.list.Len())
+				err:=poolSelected.Resize(task.list.Len())
+				if err!=nil {
+					tq.server.GetEnv().GetLogger().Println("Resize workers while poolSelected.Resize():" + err.Error())
+				}
 			}else {
 				for iter, pool := range tq.pools {
 					if (pool == nil) {
