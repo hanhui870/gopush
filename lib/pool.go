@@ -8,6 +8,7 @@ import (
 //"time"
 
 	loglocal "zooinit/log"
+	"strconv"
 )
 
 const (
@@ -241,6 +242,10 @@ func (p *Pool) Resize(size int) (error) {
 //can add when running
 func (p *Pool) expand(size int) (error) {
 	return p.initWorkers(size)
+}
+
+func (p *Pool) GetPoolName() string {
+	return "pool_"+strconv.Itoa(p.PoolID)
 }
 
 //can not harvest when running

@@ -200,6 +200,7 @@ func (tq *TaskQueue) publish() {
 			}
 
 			if poolSelected != nil {
+				tq.server.GetEnv().GetLogger().Println("PoolSelected "+poolSelected.GetPoolName()+" with workers size:" + strconv.Itoa(poolSelected.Config.Size))
 				go func() {
 					//triger sending
 					poolSelected.Send(task, tq.poolFinishChannel)
