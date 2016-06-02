@@ -5,7 +5,7 @@ import (
 	"sync"
 	"log"
 	"errors"
-//"time"
+	//"time"
 
 	loglocal "zooinit/log"
 	"strconv"
@@ -17,7 +17,7 @@ const (
 
 	POOL_DEFAULT_SIZE = 5
 	POOL_DEFAULT_CAPACITY = 500
-//test multi workers can set to 2
+	//test multi workers can set to 2
 	POOL_DEFAULT_MINISPARE = 2
 	POOL_DEFAULT_MAXSPARE = 50
 )
@@ -82,8 +82,8 @@ func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
 	pool := &Pool{Config:config}
 	pool.Env = Env
 
-	err:=pool.initWorkers(pool.Config.Size)
-	if err!=nil {
+	err := pool.initWorkers(pool.Config.Size)
+	if err != nil {
 		return nil, errors.New("Error when NewPoolByConfig():" + err.Error())
 	}
 
@@ -103,9 +103,9 @@ func (p *Pool) initWorkers(NewCount int) error {
 		var err error
 
 		//fetch old and reuse worker, length compare
-		if oldWorkers != nil && len(oldWorkers) <= iter + 1 {
+		if oldWorkers != nil && iter < len(oldWorkers) {
 			worker = oldWorkers[iter]
-		}else {
+		} else {
 			worker, err = p.Env.CreateWorker()
 			if err != nil {
 				return err
@@ -133,7 +133,7 @@ func (p *Pool) initWorkers(NewCount int) error {
 	}
 
 	// edit new count
-	p.Config.Size=NewCount
+	p.Config.Size = NewCount
 	p.Workers = workers
 
 	return nil
@@ -223,7 +223,7 @@ func (p *Pool) Resize(size int) (error) {
 	defer p.Lock.Unlock()
 
 	//need a clone's pointer
-	pCfg:=*p.Config
+	pCfg := *p.Config
 	pCfgNew := &pCfg
 
 	pCfgNew.SetSizeByQueueLength(size)
@@ -232,7 +232,7 @@ func (p *Pool) Resize(size int) (error) {
 	if pCfgNew.Size < p.Config.Size {
 		return p.harvest(pCfgNew.Size)
 
-	}else if pCfgNew.Size > p.Config.Size {
+	} else if pCfgNew.Size > p.Config.Size {
 		return p.expand(pCfgNew.Size)
 	}
 
@@ -245,7 +245,7 @@ func (p *Pool) expand(size int) (error) {
 }
 
 func (p *Pool) GetPoolName() string {
-	return "pool_"+strconv.Itoa(p.PoolID)
+	return "pool_" + strconv.Itoa(p.PoolID)
 }
 
 //can not harvest when running
@@ -293,17 +293,17 @@ func NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare int) (*PoolConfig, error)
 func (pc *PoolConfig) SetSizeByQueueLength(length int) {
 	if length <= 10 {
 		pc.Size = pc.MiniSpare
-	}else if length <= 100 {
+	} else if length <= 100 {
 		pc.Size = pc.MiniSpare * 5
-	}else if length <= 1000 {
+	} else if length <= 1000 {
 		pc.Size = pc.MiniSpare * 10
-	}else if length <= 10000 {
+	} else if length <= 10000 {
 		pc.Size = pc.MiniSpare * 50
-	}else if length <= 100000 {
+	} else if length <= 100000 {
 		pc.Size = pc.MiniSpare * 100
-	}else if length <= 500000 {
+	} else if length <= 500000 {
 		pc.Size = pc.MiniSpare * 150
-	}else {
+	} else {
 		pc.Size = pc.Capacity
 	}
 
