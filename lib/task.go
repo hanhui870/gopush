@@ -164,6 +164,22 @@ func (tq *TaskQueue) publish() {
 			// empty
 			<-tq.taskChangeChannel
 		}else {
+			//Wait task to be ready
+			if task.list.status != DEVICE_QUEUE_STATUS_PENDING {
+				for {
+					tq.server.GetEnv().GetLogger().Println("DeviceQueue status is " + task.list.status + ", will block q.queueChangeChannel for correct init workers...")
+
+					//block
+					<-task.list.queueChangeChannel
+
+					if task.list.status == DEVICE_QUEUE_STATUS_PENDING {
+						tq.server.GetEnv().GetLogger().Println("DeviceQueue status is " + task.list.status + ", will break for init pool initiation.")
+						//need to break loop
+						break
+					}
+				}
+			}
+
 			//select pool or create
 			//spare pool -> create pool -> wait
 			var poolSelected *Pool
