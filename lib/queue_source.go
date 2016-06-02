@@ -12,6 +12,7 @@ import (
 
 	"io/ioutil"
 	"net/http"
+	"bytes"
 )
 
 const (
@@ -19,7 +20,8 @@ const (
 	QUEUE_SOURCE_METHOD_FILE = "file"
 	QUEUE_SOURCE_METHOD_MYSQL = "mysql"
 
-	QUEUE_SOURCE_SEPARATOR="#,\n\t"
+	QUEUE_SOURCE_SEPARATOR_ALLOW="#,\n\t"
+	QUEUE_SOURCE_SEPARATOR=","
 )
 
 type QueueSource struct {
@@ -125,7 +127,7 @@ func (qs *QueueSource) geneApiSouce() (list []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	list = strings.Split(strings.Trim(string(cb), QUEUE_SOURCE_SEPARATOR), QUEUE_SOURCE_SEPARATOR)
+	list=qs.trimAndFormatSeparator(string(cb))
 
 	return list, nil
 }
@@ -143,9 +145,27 @@ func (qs *QueueSource) geneFileSouce() (list []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	list = strings.Split(strings.Trim(string(cb), QUEUE_SOURCE_SEPARATOR), QUEUE_SOURCE_SEPARATOR)
 
+	list=qs.trimAndFormatSeparator(string(cb))
 	return list, nil
+}
+
+func (qs *QueueSource) trimAndFormatSeparator(str string) []string {
+	str=strings.Trim(str, QUEUE_SOURCE_SEPARATOR_ALLOW)
+
+	allow:=bytes.NewBufferString(QUEUE_SOURCE_SEPARATOR_ALLOW).Bytes()
+	sep:=bytes.NewBufferString(QUEUE_SOURCE_SEPARATOR).Bytes()[0]
+	lenSep:=len(allow)
+	for iter:=0; iter<lenSep; iter++ {
+		if allow[iter]== sep {
+			continue
+		}
+
+		str=strings.Replace(str, string(allow[iter]), QUEUE_SOURCE_SEPARATOR, -1)
+	}
+	list:= strings.Split(str, QUEUE_SOURCE_SEPARATOR)
+
+	return list
 }
 
 //TODO
