@@ -20,7 +20,7 @@ func main() {
 	//normal one
 	notification := &apns.Notification{}
 	notification.DeviceToken = "3523544012e5491b3fe8cf6627eddd123d6aa4191fbebf371191a3ce7d4c02ac"
-	notification.ApnsID = uuid.NewV1().String()
+	notification.ApnsID = uuid.NewV4().String()
 	notification.Priority = 10
 	notification.Topic = ""
 	load := payload.NewPayload()
