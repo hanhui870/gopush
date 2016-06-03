@@ -11,6 +11,7 @@ import (
 	apns "github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/certificate"
 	"github.com/sideshow/apns2/payload"
+	"github.com/twinj/uuid"
 
 	"gopush/lib"
 )
@@ -35,6 +36,9 @@ type Worker struct {
 	PushChannel     chan *lib.WorkerRequeset
 	//WorkerID
 	ResponseChannel chan *lib.WorkerResponse
+
+	//worker's uuid identify
+	UUID            string
 }
 
 
@@ -54,7 +58,7 @@ func NewWorker(env *EnvInfo) (*Worker, error) {
 		return nil, errors.New("Unsupport worker environment: "+env.CertENV)
 	}
 
-	worker := &Worker{Client:client, Status:lib.WORKER_STATUS_SPARE, PushChannel:make(chan *lib.WorkerRequeset), ResponseChannel:make(chan *lib.WorkerResponse)}
+	worker := &Worker{Client:client, Status:lib.WORKER_STATUS_SPARE, PushChannel:make(chan *lib.WorkerRequeset), ResponseChannel:make(chan *lib.WorkerResponse), UUID:uuid.NewV4().String()}
 
 	return worker, nil
 }
@@ -182,6 +186,10 @@ func (w *Worker) Destroy() (error) {
 
 func (w *Worker) Status() int {
 	return w.Status
+}
+
+func (w *Worker) UUID() string {
+	return w.UUID
 }
 
 func GetCerts(path, password string) (tls.Certificate, error) {

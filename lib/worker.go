@@ -34,6 +34,9 @@ type Worker interface {
 	Destroy() (error)
 
 	Status() int
+
+	//worker's uuid identify
+	UUID() string
 }
 
 type WorkerRequeset struct {
