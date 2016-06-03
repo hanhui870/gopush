@@ -14,6 +14,8 @@ const (
 type Worker interface {
 	Run()
 
+	Stop()
+
 	// Subscribe device goroutine run
 	Subscribe(task *Task)
 
@@ -30,6 +32,8 @@ type Worker interface {
 	SetPool(pool *Pool) (bool)
 
 	Destroy() (error)
+
+	Status() int
 }
 
 type WorkerRequeset struct {

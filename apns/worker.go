@@ -78,6 +78,13 @@ func (w *Worker) Run() {
 	}
 }
 
+// stop worker running
+func (w *Worker) Stop() {
+	request := &lib.WorkerRequeset{Cmd:lib.WORKER_COMMAND_STOP}
+	env.GetLogger().Println(w.GetWorkerName() + " send Stop() command.")
+	w.PushChannel <- request
+}
+
 // this a goroutine run
 func (w *Worker) Subscribe(task *lib.Task) {
 	env.GetLogger().Println(w.GetWorkerName() + " started to Subscribe...")
@@ -148,8 +155,8 @@ func (w *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 		w.Pool.GetFailLogger().Println(w.GetWorkerName() + " " + msgLocal.DeviceToken + " -> " + strconv.Itoa(resp.StatusCode) + " -> " + resp.Reason + " -> " + strconv.Itoa(int(timeSpent)) + "us -> " + resp.Timestamp.Format(time.RFC3339))
 	}
 
-	w.Lock.Unlock()
 	w.Status = lib.WORKER_STATUS_SPARE
+	w.Lock.Unlock()
 
 	return &lib.WorkerResponse{Response:resp, Error:err}
 }
@@ -171,6 +178,10 @@ func (w *Worker) SetPool(pool *lib.Pool) (bool) {
 func (w *Worker) Destroy() (error) {
 
 	return nil
+}
+
+func (w *Worker) Status() int {
+	return w.Status
 }
 
 func GetCerts(path, password string) (tls.Certificate, error) {
