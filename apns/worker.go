@@ -196,6 +196,14 @@ func (w *Worker) GetLockPtr() *sync.Mutex {
 	return &w.Lock
 }
 
+func (w *Worker) GetWorkerID() int {
+	return w.WorkerID
+}
+
+func (w *Worker) GetPool() *lib.Pool {
+	return w.Pool
+}
+
 func GetCerts(path, password string) (tls.Certificate, error) {
 	cert, pemErr := certificate.FromP12File(path, password)
 	if pemErr != nil {

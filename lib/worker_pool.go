@@ -30,7 +30,7 @@ func (wp *WorkerPool) CreateWorker() (Worker, error) {
 
 	var worker Worker
 	for _, wkTmp := range wp.workers {
-		if wkTmp.GetStatus() == WORKER_STATUS_SPARE {
+		if wkTmp.GetPool() == nil && wkTmp.GetWorkerID() == 0 && wkTmp.GetStatus() == WORKER_STATUS_SPARE {
 			worker = wkTmp
 		}
 	}

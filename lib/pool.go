@@ -108,19 +108,18 @@ func (p *Pool) initWorkers(NewCount int) error {
 				return err
 			}
 
+			//不能用append, 会增长数组.
+			//workers=append(workers, worker)
+			//start from 0
+			//old worker do not need to init
+			worker.SetWorkerID(iter)
+			worker.SetPool(p)
 
 			//fixed: Here has an error Mode if run in anonymous func, worker started is not in expected mode
 			go func(worker Worker) {
 				worker.Run()
 			}(worker)
 		}
-
-
-		//不能用append, 会增长数组.
-		//workers=append(workers, worker)
-		//start from 0
-		worker.SetWorkerID(iter)
-		worker.SetPool(p)
 
 		workers[iter] = worker
 	}

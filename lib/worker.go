@@ -27,9 +27,11 @@ type Worker interface {
 
 	// Set worker id
 	SetWorkerID(id int) (bool)
+	GetWorkerID() (int)
 
 	// Set worker's belonging pool
 	SetPool(pool *Pool) (bool)
+	GetPool() (*Pool)
 
 	Destroy() (error)
 
