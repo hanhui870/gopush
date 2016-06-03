@@ -124,8 +124,8 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	return env
 }
 
-func (p *EnvInfo) CreateWorker() (lib.Worker, error) {
-	worker, err := NewWorker(p)
+func (e *EnvInfo) CreateWorker() (lib.Worker, error) {
+	worker, err := NewWorker(e)
 	if err != nil {
 		return nil, err
 	}
@@ -134,14 +134,16 @@ func (p *EnvInfo) CreateWorker() (lib.Worker, error) {
 }
 
 // TODO destroy
-func (p *EnvInfo) DestroyWorker(worker lib.Worker) (error) {
+func (e *EnvInfo) DestroyWorker(worker lib.Worker) (error) {
+
+
 	return nil
 }
 
-func (p *EnvInfo) GetPoolConfig() (*lib.PoolConfig) {
-	return p.PoolConfig
+func (e *EnvInfo) GetPoolConfig() (*lib.PoolConfig) {
+	return e.PoolConfig
 }
 
-func (p *EnvInfo) GetQueueSourceConfig() (*lib.QueueSourceConfig){
-	return p.QueueSourceConfig
+func (e *EnvInfo) GetQueueSourceConfig() (*lib.QueueSourceConfig) {
+	return e.QueueSourceConfig
 }
