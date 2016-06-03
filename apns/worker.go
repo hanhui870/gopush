@@ -85,6 +85,8 @@ func (w *Worker) Subscribe(task *lib.Task) {
 		DeviceToken, more := <-task.GetList().Channel
 		if more {
 			request := lib.NewWorkerRequeset(task.GetMessage(), DeviceToken, lib.WORKER_COMMAND_SEND)
+			//for debug usage
+			//env.GetLogger().Println(w.GetWorkerName() + " fetch Device: "+DeviceToken)
 			w.PushChannel <- request
 
 			//finish

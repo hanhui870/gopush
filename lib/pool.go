@@ -87,9 +87,6 @@ func NewPoolByConfig(config *PoolConfig, Env EnvInfo) (*Pool, error) {
 		return nil, errors.New("Error when NewPoolByConfig():" + err.Error())
 	}
 
-	//run when created.
-	go pool.Run()
-
 	return pool, nil
 }
 
@@ -110,6 +107,12 @@ func (p *Pool) initWorkers(NewCount int) error {
 			if err != nil {
 				return err
 			}
+
+
+			//fixed: Here has an error Mode if run in anonymous func, worker started is not in expected mode
+			go func(worker Worker) {
+				worker.Run()
+			}(worker)
 		}
 
 
@@ -137,26 +140,6 @@ func (p *Pool) initWorkers(NewCount int) error {
 	p.Workers = workers
 
 	return nil
-}
-
-func (p *Pool) Run() {
-	if len(p.Workers) != p.Config.Size {
-		p.Env.GetLogger().Fatalln("Found exception of pool: len(p.Workers)!=p.Size: ", len(p.Workers), p.Config.Size)
-	}
-
-	for _, worker := range p.Workers {
-		p.wg.Add(1)
-		//env.GetLogger().Println(worker.GetWorkerName()+" ...")
-
-		//fixed: Here has an error Mode if run in anonymous func, worker started is not in expected mode
-		go func(worker Worker) {
-			worker.Run()
-			p.wg.Done()
-		}(worker)
-	}
-
-	// wait for all done worker.Run() / worker.Subscribe()
-	p.wg.Wait()
 }
 
 // finish, taskqueue's finish channel
