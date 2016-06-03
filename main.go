@@ -16,7 +16,7 @@ func main() {
 	app.Copyright = "haimi.com All rights reseverd."
 	app.Name = "gopush"
 	app.Usage = "Go push service for app."
-	app.Version = "0.0.1"
+	app.Version = "1.0.0"
 
 	cfgFlag := &cli.StringFlag{
 		Name:  "config, f",
