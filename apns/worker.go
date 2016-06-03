@@ -170,11 +170,17 @@ func (w *Worker) GetWorkerName() (string) {
 }
 
 func (w *Worker) SetWorkerID(id int) (bool) {
+	w.Lock.Lock()
+	defer w.Lock.Unlock()
+
 	w.WorkerID = id
 	return true
 }
 
 func (w *Worker) SetPool(pool *lib.Pool) (bool) {
+	w.Lock.Lock()
+	defer w.Lock.Unlock()
+
 	w.Pool = pool
 	return true
 }
