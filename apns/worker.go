@@ -184,12 +184,16 @@ func (w *Worker) Destroy() (error) {
 	return nil
 }
 
-func (w *Worker) Status() int {
+func (w *Worker) GetStatus() int {
 	return w.Status
 }
 
-func (w *Worker) UUID() string {
+func (w *Worker) GetUUID() string {
 	return w.UUID
+}
+
+func (w *Worker) GetLockPtr() *sync.Mutex {
+	return &w.Lock
 }
 
 func GetCerts(path, password string) (tls.Certificate, error) {

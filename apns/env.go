@@ -23,6 +23,8 @@ type EnvInfo struct {
 	PoolConfig   *lib.PoolConfig
 
 	QueueSourceConfig *lib.QueueSourceConfig
+
+	WorkerPool *lib.WorkerPool
 }
 
 func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
@@ -112,6 +114,12 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	}
 	//set qsconfig
 	env.QueueSourceConfig=qsConfig
+	wp, err := lib.NewWorkerPool(env)
+	if err != nil {
+		log.Fatalln("Create lib.NewWorkerPool error: " + err.Error())
+	} else {
+		env.WorkerPool = wp
+	}
 
 	//create uuid
 	env.CreateUUID()
@@ -142,6 +150,10 @@ func (e *EnvInfo) DestroyWorker(worker lib.Worker) (error) {
 
 func (e *EnvInfo) GetPoolConfig() (*lib.PoolConfig) {
 	return e.PoolConfig
+}
+
+func (e *EnvInfo) GetWorkerPool() (*lib.WorkerPool) {
+	return e.WorkerPool
 }
 
 func (e *EnvInfo) GetQueueSourceConfig() (*lib.QueueSourceConfig) {

@@ -15,5 +15,7 @@ type EnvInfo interface {
 
 	GetPoolConfig() (*PoolConfig)
 
+	GetWorkerPool() (*WorkerPool)
+
 	GetQueueSourceConfig() (*QueueSourceConfig)
 }

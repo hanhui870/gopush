@@ -1,7 +1,7 @@
 // Copyright 2016 祝景法(Bruce)@haimi.com. www.haimi.com All rights reserved.
 package lib
 
-import ()
+import "sync"
 
 const (
 	WORKER_STATUS_SPARE = iota
@@ -33,10 +33,12 @@ type Worker interface {
 
 	Destroy() (error)
 
-	Status() int
+	GetStatus() int
 
 	//worker's uuid identify
-	UUID() string
+	GetUUID() string
+
+	GetLockPtr() *sync.Mutex
 }
 
 type WorkerRequeset struct {

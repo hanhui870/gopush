@@ -103,7 +103,7 @@ func (p *Pool) initWorkers(NewCount int) error {
 		if oldWorkers != nil && iter < len(oldWorkers) {
 			worker = oldWorkers[iter]
 		} else {
-			worker, err = p.Env.CreateWorker()
+			worker, err = p.Env.GetWorkerPool().CreateWorker()
 			if err != nil {
 				return err
 			}
@@ -126,12 +126,17 @@ func (p *Pool) initWorkers(NewCount int) error {
 	}
 
 	// need to destroy old workers
-	// TODO This workers can be reusable, but have to related to Env for multi certs.
+	// fixed: This workers can be reusable, but have to related to Env for multi certs.
 	if len(oldWorkers) > len(workers) {
 		iter := len(workers)//no need minus 1
 		for ; iter < len(oldWorkers); iter++ {
-			//trigger action
-			oldWorkers[iter].Destroy()
+			//stop running
+			oldWorkers[iter].Stop()
+
+			err := p.Env.GetWorkerPool().HarvestWorker(oldWorkers[iter])
+			if err != nil {
+				return err
+			}
 		}
 	}
 
