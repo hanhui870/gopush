@@ -93,6 +93,7 @@ func (w *Worker) Stop() {
 
 	//finish
 	<-w.ResponseChannel
+	env.GetLogger().Println(w.GetWorkerName() + " finish Stop() action.")
 }
 
 // this a goroutine run
