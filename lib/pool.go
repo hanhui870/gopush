@@ -124,6 +124,11 @@ func (p *Pool) initWorkers(NewCount int) error {
 		workers[iter] = worker
 	}
 
+	// edit new count
+	p.Config.Size = NewCount
+	p.Workers = workers
+	p.Env.GetLogger().Println("PoolSelected " + p.GetPoolName() + " with workers size:" + strconv.Itoa(len(workers)) + " config: " + strconv.Itoa(p.Config.Size))
+
 	// need to destroy old workers
 	// fixed: This workers can be reusable, but have to related to Env for multi certs.
 	if len(oldWorkers) > len(workers) {
@@ -139,9 +144,6 @@ func (p *Pool) initWorkers(NewCount int) error {
 		}
 	}
 
-	// edit new count
-	p.Config.Size = NewCount
-	p.Workers = workers
 
 	return nil
 }

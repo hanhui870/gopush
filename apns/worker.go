@@ -66,13 +66,16 @@ func NewWorker(env *EnvInfo) (*Worker, error) {
 // this is a goroutine run
 func (w *Worker) Run() {
 	env.GetLogger().Println(w.GetWorkerName() + " started, wait for push task...")
+
+	ForLoop:
 	for {
 		select {
 		// need transfer by copy
 		case request := <-w.PushChannel:
 			if request == nil || request.Cmd == lib.WORKER_COMMAND_STOP {
-				env.GetLogger().Println(w.GetWorkerName() + " receive terminate channel signal, will quit.")
-				break
+				env.GetLogger().Println(w.GetWorkerName() + " receive Stop channel signal, will stop running.")
+				w.ResponseChannel <- &lib.WorkerResponse{}
+				break ForLoop
 			}else {
 				//return response
 				resp := w.Push(request.Message, request.Device)
@@ -82,11 +85,14 @@ func (w *Worker) Run() {
 	}
 }
 
-// stop worker running
+// stop worker running, add lock
 func (w *Worker) Stop() {
 	request := &lib.WorkerRequeset{Cmd:lib.WORKER_COMMAND_STOP}
 	env.GetLogger().Println(w.GetWorkerName() + " send Stop() command.")
 	w.PushChannel <- request
+
+	//finish
+	<-w.ResponseChannel
 }
 
 // this a goroutine run
