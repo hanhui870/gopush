@@ -50,9 +50,6 @@ func (wp *WorkerPool) CreateWorker() (Worker, error) {
 
 //reset Worker ownership
 func (wp *WorkerPool) HarvestWorker(worker Worker) (error) {
-	(*worker.GetLockPtr()).Lock()
-	defer (*worker.GetLockPtr()).Unlock()
-
 	if worker.GetStatus() != WORKER_STATUS_SPARE {
 		return errors.New("Error when WorkerPool.HarvestWorker(): worker.GetStatus!=WORKER_STATUS_SPARE")
 	}
