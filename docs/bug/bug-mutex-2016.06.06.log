@@ -1,0 +1,69 @@
+#并行任务导致,worker pool被缩小.
+
+2016/06/06 20:59:52.431230 worker.go:68: pool_0_worker_0 started, wait for push task...
+2016/06/06 20:59:52.439499 pool.go:130: PoolSelected pool_0 with workers size:2 config: 2
+2016/06/06 20:59:52.439554 worker.go:68: pool_0_worker_1 started, wait for push task...
+2016/06/06 20:59:52.439670 pool.go:161: Receive new push task: {"title":"海蜜全球购","body":"无限回购的入门精华，兰蔻小黑瓶肌底液，50ML特卖515元，官方价1080元。","cust
+om":{"payload":"haimi-870"},"sound":"bingbong.aiff","uuid":"36ffe074-2cf0-4cd6-9f38-37cf0ec9ee3e"}
+2016/06/06 20:59:52.439712 worker.go:101: pool_0_worker_1 started to Subscribe...
+2016/06/06 20:59:52.439742 queue.go:74: DeviceQueue status is pending, publish now...
+2016/06/06 20:59:52.439768 worker.go:147: pool_0_worker_1 #start# to push for DeviceToken: 3523544012e5491b3fe8cf6627eddd123d6aa4191fbebf371191a3ce7d4c02ac
+2016/06/06 20:59:52.439778 worker.go:101: pool_0_worker_0 started to Subscribe...
+2016/06/06 20:59:54.080867 worker.go:162: pool_0_worker_1 sent #success#: 3523544012e5491b3fe8cf6627eddd123d6aa4191fbebf371191a3ce7d4c02ac -> 36ffe074-2cf0-4cd6-9f38-3
+7cf0ec9ee3e
+2016/06/06 21:00:01.611236 env.go:221: Found localip for boot: 10.10.1.8
+2016/06/06 21:00:01.637374 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/06/06 21:00:01.637450 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/06/06 21:05:01.383578 env.go:221: Found localip for boot: 10.10.1.8
+2016/06/06 21:05:01.398622 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/06/06 21:05:01.398690 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/06/06 21:00:00.668576 handler.go:39: Receive request:  map[title:[海蜜全球购] body:[无限回购的入门精华，兰蔻小黑瓶肌底液，50ML特卖515元，官方价1080元。] custom:[{
+"payload":"haimi-869"}] sound:[bingbong.aiff] queue:[]]
+2016/06/06 21:00:00.668676 handler.go:137: Resp: {"error":false,"message":"Sent:f41778c1-1b71-473e-adf5-aa910971d77e Position:0","code":0,"push-id":"f41778c1-1b71-473e
+-adf5-aa910971d77e","position":0}
+2016/06/06 21:00:00.668757 task.go:170: DeviceQueue status is init, will block q.queueChangeChannel for correct init workers...
+2016/06/06 21:00:00.668808 queue_builder.go:48: Init DeviceQueue data from QueueSource: select PushID from sys_push_client where `Platform`='IOS' and `AppName`="haimi"
+ and CreateTime>"2015-11-10 00:00:00" and LastUpdateTime>"2015-11-10 00:00:00" group by PushID
+2016/06/06 21:00:03.407312 handler.go:39: Receive request:  map[title:[海蜜全球购] body:[您的订单列表，请查看] custom:[{"payload":"haimi-871"}] sound:[bingbong.aiff] d
+eviceids:[72af8efa702621fffea40ea6701638738537e282fbe34ef9a48bdff7a7c00779]]
+2016/06/06 21:00:03.407445 handler.go:137: Resp: {"error":false,"message":"Sent:87771b10-15e7-4206-9962-12cbe2c5eb01 Position:1","code":0,"push-id":"87771b10-15e7-4206
+-9962-12cbe2c5eb01","position":1}
+2016/06/06 21:00:03.407553 queue_builder.go:72: Init DeviceQueue data from DeviceIDs parameter.
+2016/06/06 21:00:03.407579 queue_builder.go:86: Queue data build finish, devices pending to send: 1
+2016/06/06 21:00:05.714026 queue_builder.go:86: Queue data build finish, devices pending to send: 102386
+2016/06/06 21:00:05.714057 task.go:176: DeviceQueue status is pending, will break for init pool initiation.
+2016/06/06 21:00:05.720243 worker.go:68: pool_0_worker_2 started, wait for push task...
+2016/06/06 21:00:05.726121 worker.go:68: pool_0_worker_3 started, wait for push task...
+2016/06/06 21:00:05.731709 worker.go:68: pool_0_worker_4 started, wait for push task...
+2016/06/06 21:00:05.737105 worker.go:68: pool_0_worker_5 started, wait for push task...
+
+2016/06/06 21:00:07.485268 worker.go:68: pool_0_worker_296 started, wait for push task...
+2016/06/06 21:00:07.491126 worker.go:68: pool_0_worker_297 started, wait for push task...
+2016/06/06 21:00:07.496939 worker.go:68: pool_0_worker_298 started, wait for push task...
+2016/06/06 21:00:07.502319 pool.go:130: PoolSelected pool_0 with workers size:300 config: 300
+2016/06/06 21:00:07.502352 pool.go:130: PoolSelected pool_0 with workers size:2 config: 2
+2016/06/06 21:00:07.502358 worker.go:91: pool_0_worker_2 send Stop() command.
+2016/06/06 21:00:07.502390 worker.go:68: pool_0_worker_299 started, wait for push task...
+2016/06/06 21:00:07.502418 worker.go:76: pool_0_worker_2 receive Stop channel signal, will stop running.
+2016/06/06 21:00:07.502430 worker.go:96: pool_0_worker_2 finish Stop() action.
+2016/06/06 21:00:07.502441 worker.go:91: pool_0_worker_3 send Stop() command.
+
+
+2016/06/06 21:00:07.513574 worker.go:96: pool_0_worker_299 finish Stop() action.
+2016/06/06 21:00:07.513633 pool.go:161: Receive new push task: {"title":"海蜜全球购","body":"您的订单列表，请查看","custom":{"payload":"haimi-871"},"sound":"bingbong.aiff","uuid":"87771b10-15e7-4206-9962-12cbe2c5eb01"}
+2016/06/06 21:00:07.513668 worker.go:101: pool_0_worker_1 started to Subscribe...
+2016/06/06 21:00:07.513700 queue.go:74: DeviceQueue status is pending, publish now...
+2016/06/06 21:00:07.513743 worker.go:147: pool_0_worker_1 #start# to push for DeviceToken: 72af8efa702621fffea40ea6701638738537e282fbe34ef9a48bdff7a7c00779
+2016/06/06 21:00:07.513709 worker.go:101: pool_0_worker_0 started to Subscribe...
+2016/06/06 21:00:07.690009 worker.go:162: pool_0_worker_1 sent #success#: 72af8efa702621fffea40ea6701638738537e282fbe34ef9a48bdff7a7c00779 -> 87771b10-15e7-4206-9962-12cbe2c5eb01
+2016/06/06 21:00:07.690081 pool.go:161: Receive new push task: {"title":"海蜜全球购","body":"无限回购的入门精华，兰蔻小黑瓶肌底液，50ML特卖515元，官方价1080元。","custom":{"payload":"haimi-869"},"sound":"bingbong.aiff","uuid":"f41778c1-1b71-473e-adf5-aa910971d77e"}
+2016/06/06 21:00:07.690102 worker.go:101: pool_0_worker_1 started to Subscribe...
+2016/06/06 21:00:07.690125 queue.go:74: DeviceQueue status is pending, publish now...
+2016/06/06 21:00:07.690222 worker.go:101: pool_0_worker_0 started to Subscribe...
+2016/06/06 21:00:07.690240 worker.go:147: pool_0_worker_1 #start# to push for DeviceToken: 00015c05d4eeaef6d2fd5bcfa1670a55d689b6cf12c86bfaa375d33feddaeeb0
+2016/06/06 21:00:07.690251 worker.go:147: pool_0_worker_0 #start# to push for DeviceToken: 0002bf5c14f86416f0cb715432ff7bb7aed91a5b17f5531eb54c04bd1fc6573b
+2016/06/06 21:00:07.866242 worker.go:162: pool_0_worker_1 sent #success#: 00015c05d4eeaef6d2fd5bcfa1670a55d689b6cf12c86bfaa375d33feddaeeb0 -> f41778c1-1b71-473e-adf5-aa910971d77e
+2016/06/06 21:00:07.866310 worker.go:147: pool_0_worker_1 #start# to push for DeviceToken: 0002cf6b8d1ec7e5bc11d351caa6c6850c8eba2fc05f01e7fcdfd74251eebec8
+2016/06/06 21:00:08.042965 worker.go:162: pool_0_worker_1 sent #success#: 0002cf6b8d1ec7e5bc11d351caa6c6850c8eba2fc05f01e7fcdfd74251eebec8 -> f41778c1-1b71-473e-adf5-aa910971d77e
+2016/06/06 21:00:08.043034 worker.go:147: pool_0_worker_1 #start# to push for DeviceToken: 0003c5d673cd06a76f33e41ebd1dbf6d6cf0aa3230322536cf5b91c8c962c12a
+2016/06/06 21:00:08.218882 worker.go:162: pool_0_worker_1 sent #success#: 0003c5d673cd06a76f33e41ebd1dbf6d6cf0aa3230322536cf5b91c8c962c12a -> f41778c1-1b71-473e-adf5-aa910971d77e
