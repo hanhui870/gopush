@@ -23,7 +23,7 @@ const (
 )
 
 //pool automatic resize if needed
-//TODO can use workers globally for connection saving. @see initWorkers()
+//fixed can use workers globally for connection saving. @see initWorkers()
 type Pool struct {
 	//worker pool
 	Workers    []Worker
@@ -40,8 +40,8 @@ type Pool struct {
 	//worker wg
 	wg         sync.WaitGroup
 
-	OKLogger   *loglocal.BufferedFileLogger
-	FailLogger *loglocal.BufferedFileLogger
+	OKLogger   loglocal.ILogger
+	FailLogger loglocal.ILogger
 
 	Env        EnvInfo
 
@@ -186,7 +186,7 @@ func (p *Pool) Send(task *Task, finish chan int) {
 	finish <- p.PoolID
 }
 
-func (p *Pool) GetOKLogger() (*loglocal.BufferedFileLogger) {
+func (p *Pool) GetOKLogger() (loglocal.ILogger) {
 	if p.OKLogger == nil {
 		p.OKLogger = p.getInternalLogger("ok")
 	}
@@ -194,7 +194,7 @@ func (p *Pool) GetOKLogger() (*loglocal.BufferedFileLogger) {
 	return p.OKLogger
 }
 
-func (p *Pool) GetFailLogger() (*loglocal.BufferedFileLogger) {
+func (p *Pool) GetFailLogger() (loglocal.ILogger) {
 	if p.FailLogger == nil {
 		p.FailLogger = p.getInternalLogger("fail")
 	}
@@ -246,15 +246,18 @@ func (p *Pool) harvest(size int) (error) {
 	return p.initWorkers(size)
 }
 
-func (p *Pool) getInternalLogger(logtype string) (*loglocal.BufferedFileLogger) {
-	filename := loglocal.GenerateFileLogPathName(p.Env.GetLogPath(), "pool_" + logtype)
-	file, err := loglocal.NewFileLog(filename)
+func (p *Pool) getInternalLogger(logtype string) (loglocal.ILogger) {
+	// Construct logger instance
+	rs, err := loglocal.NewRotateStrategyDate(loglocal.ROTATE_DATE_DAY)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Error when loglocal.NewRotateStrategyDate(): " + err.Error())
+	}
+	rfl, err := loglocal.NewRotateFileLogger(p.Env.GetLogChannel(), p.Env.GetLogPath(), "pool_" + logtype, rs)
+	if err != nil {
+		log.Fatalln("Error when loglocal.NewRotateFileLogger(): " + err.Error())
 	}
 
-	logger := log.New(file, "", log.Ldate | log.Ltime | log.Lmicroseconds) // add time for stat
-	return loglocal.GetBufferedFileLogger(file, logger)
+	return rfl
 }
 
 func NewPoolConfig(Size, Capacity, MiniSpare, MaxSpare int) (*PoolConfig, error) {
