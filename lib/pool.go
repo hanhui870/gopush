@@ -13,7 +13,10 @@ import (
 
 const (
 	POOL_STATUS_SPARE = iota
+	//pool selected and running
 	POOL_STATUS_RUNNING
+	//spare->running->sending->spare
+	POOL_STATUS_SENDING
 
 	POOL_DEFAULT_SIZE = 5
 	POOL_DEFAULT_CAPACITY = 500
@@ -29,6 +32,7 @@ type Pool struct {
 	Workers    []Worker
 
 	//Pool status
+	//spare->running->sending->spare
 	Status     int
 	PoolID     int
 
@@ -171,6 +175,7 @@ func (p *Pool) Send(task *Task, finish chan int) {
 		p.Env.GetLogger().Println(p.GetPoolName() + " p.Status != POOL_STATUS_RUNNING, please check TaskQueue.getSparePool() ")
 		return
 	}
+	p.Status = POOL_STATUS_SENDING
 
 	con, err := task.message.MarshalJSON()
 	if err != nil {
@@ -258,8 +263,8 @@ func (p *Pool) GetPoolName() string {
 
 //can not harvest when running
 func (p *Pool) harvest(size int) (error) {
-	if p.Status == POOL_STATUS_RUNNING {
-		return errors.New("Pool can't harvest worker when running.")
+	if p.Status == POOL_STATUS_SENDING {
+		return errors.New("Pool can't harvest worker when pool sending data.")
 	}
 
 	return p.initWorkers(size)
