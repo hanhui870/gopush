@@ -117,6 +117,7 @@ func (w *Worker) Subscribe(task *lib.Task) {
 
 func (w *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerResponse) {
 	w.Lock.Lock()
+	defer w.Lock.Unlock()
 
 	msgLocal := &apns.Notification{}
 	msgLocal.DeviceToken = Device
@@ -167,7 +168,6 @@ func (w *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 	}
 
 	w.Status = lib.WORKER_STATUS_SPARE
-	w.Lock.Unlock()
 
 	return &lib.WorkerResponse{Response:resp, Error:err}
 }
