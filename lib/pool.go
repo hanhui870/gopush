@@ -151,14 +151,18 @@ func (p *Pool) initWorkers(NewCount int) error {
 // finish, taskqueue's finish channel
 func (p *Pool) Send(task *Task, finish chan int) {
 	p.Lock.Lock()
-	p.Status = POOL_STATUS_RUNNING
+
+	if p.Status != POOL_STATUS_RUNNING {
+		p.Env.GetLogger().Println(p.GetPoolName() + " p.Status != POOL_STATUS_RUNNING, please check TaskQueue.getSparePool() ")
+		return
+	}
 
 	con, err := task.message.MarshalJSON()
 	if err != nil {
-		p.Env.GetLogger().Println("msg.MarshalJSON() found error:", err)
+		p.Env.GetLogger().Println(p.GetPoolName() + " msg.MarshalJSON() found error:", err)
 		return
 	}
-	p.Env.GetLogger().Println("Receive new push task: " + string(con))
+	p.Env.GetLogger().Println(p.GetPoolName() + "Receive new push task: " + string(con))
 
 	p.sendWg.Add(1)
 	// Queue data publish
@@ -181,7 +185,7 @@ func (p *Pool) Send(task *Task, finish chan int) {
 	//test, pools iter
 	//time.Sleep(5*time.Second)
 
-	p.Lock.Unlock()
+	//update status
 	p.Status = POOL_STATUS_SPARE
 	finish <- p.PoolID
 }

@@ -145,11 +145,22 @@ func (tq *TaskQueue)Read() (*Task, error) {
 	}
 }
 
-//publish goroutine
-func (tq *TaskQueue) getSparePool() (*Pool) {
+//pool entrance, need sync
+func (tq *TaskQueue) getSparePoolAndUpdateStatus() (*Pool) {
 	for _, pool := range tq.pools {
+		pool.Lock.Lock()
+
+		//select and update status
+		var poolSelected *Pool
 		if pool != nil && pool.Status == POOL_STATUS_SPARE {
-			return pool
+			poolSelected = pool
+			poolSelected.Status = POOL_STATUS_RUNNING
+		}
+
+		pool.Lock.Unlock()
+
+		if poolSelected != nil {
+			return poolSelected
 		}
 	}
 
@@ -183,7 +194,9 @@ func (tq *TaskQueue) publish() {
 			//select pool or create
 			//spare pool -> create pool -> wait
 			var poolSelected *Pool
-			pool := tq.getSparePool()
+			// fetch spare pool and update status
+			pool := tq.getSparePoolAndUpdateStatus()
+
 			if pool != nil {
 				poolSelected = pool
 
@@ -223,7 +236,7 @@ func (tq *TaskQueue) publish() {
 				}()
 
 				//pop task when started, or will resend
-				//TODO if send failed
+				//TODO if send failed, can add a sending list, can do with finish send result.
 				tq.Pop()
 
 			}else {
