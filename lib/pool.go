@@ -148,9 +148,24 @@ func (p *Pool) initWorkers(NewCount int) error {
 	return nil
 }
 
+// Lock and check can fetch the pool
+func (p *Pool) TryLockAndAllocate() bool {
+	p.Lock.Lock()
+	defer p.Lock.Unlock()
+
+	if p.Status == POOL_STATUS_SPARE {
+
+		p.Status = POOL_STATUS_RUNNING
+		return true
+	}
+
+	return false
+}
+
 // finish, taskqueue's finish channel
 func (p *Pool) Send(task *Task, finish chan int) {
 	p.Lock.Lock()
+	defer p.Lock.Unlock()
 
 	if p.Status != POOL_STATUS_RUNNING {
 		p.Env.GetLogger().Println(p.GetPoolName() + " p.Status != POOL_STATUS_RUNNING, please check TaskQueue.getSparePool() ")
@@ -244,7 +259,7 @@ func (p *Pool) GetPoolName() string {
 //can not harvest when running
 func (p *Pool) harvest(size int) (error) {
 	if p.Status == POOL_STATUS_RUNNING {
-		return errors.New("Pool can't add worker when running.")
+		return errors.New("Pool can't harvest worker when running.")
 	}
 
 	return p.initWorkers(size)

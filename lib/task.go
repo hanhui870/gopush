@@ -146,21 +146,12 @@ func (tq *TaskQueue)Read() (*Task, error) {
 }
 
 //pool entrance, need sync
-func (tq *TaskQueue) getSparePoolAndUpdateStatus() (*Pool) {
+func (tq *TaskQueue) getSparePool() (*Pool) {
 	for _, pool := range tq.pools {
-		pool.Lock.Lock()
 
 		//select and update status
-		var poolSelected *Pool
-		if pool != nil && pool.Status == POOL_STATUS_SPARE {
-			poolSelected = pool
-			poolSelected.Status = POOL_STATUS_RUNNING
-		}
-
-		pool.Lock.Unlock()
-
-		if poolSelected != nil {
-			return poolSelected
+		if pool != nil && pool.TryLockAndAllocate() {
+			return pool
 		}
 	}
 
@@ -194,8 +185,8 @@ func (tq *TaskQueue) publish() {
 			//select pool or create
 			//spare pool -> create pool -> wait
 			var poolSelected *Pool
-			// fetch spare pool and update status
-			pool := tq.getSparePoolAndUpdateStatus()
+			// fetch spare pool
+			pool := tq.getSparePool()
 
 			if pool != nil {
 				poolSelected = pool
@@ -219,8 +210,12 @@ func (tq *TaskQueue) publish() {
 						}else {
 							//update poolid
 							pool.PoolID = iter
-
 							tq.pools[iter] = pool
+
+							//select and update status
+							if !pool.TryLockAndAllocate() {
+								tq.server.GetEnv().GetLogger().Println(pool.GetPoolName() + " pool.TryLockAndAllocate() failed after created.")
+							}
 							poolSelected = pool
 							break
 						}
