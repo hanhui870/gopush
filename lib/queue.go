@@ -78,7 +78,7 @@ func (q *DeviceQueue) Publish() {
 			for {
 				q.server.GetEnv().GetLogger().Println("DeviceQueue status is " + q.status + ", will block q.queueChangeChannel...")
 
-				//block
+				//block, wait in task.go: tq.publish(), this will not happen.
 				<-q.queueChangeChannel
 
 				if q.status != DEVICE_QUEUE_STATUS_INIT && q.status != DEVICE_QUEUE_STATUS_SUSPEND {

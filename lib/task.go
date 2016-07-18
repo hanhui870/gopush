@@ -159,13 +159,23 @@ func (tq *TaskQueue) getSparePool() (*Pool) {
 }
 
 //publish goroutine
+//
+//tq.taskChangeChannel capacity issue:
 func (tq *TaskQueue) publish() {
 	for {
 		task, err := tq.Read()
 		if err != nil {
+			tq.server.GetEnv().GetLogger().Println("TaskQueue is empty, wait for taskChangeChannel...")
 			// empty
 			<-tq.taskChangeChannel
+
+			continue
 		}else {
+			//free channel buf
+			if len(tq.taskChangeChannel) > 1 {
+				<-tq.taskChangeChannel
+			}
+
 			//Wait task to be ready
 			if task.list.status != DEVICE_QUEUE_STATUS_PENDING {
 				for {
@@ -197,6 +207,7 @@ func (tq *TaskQueue) publish() {
 					tq.server.GetEnv().GetLogger().Println("Resize workers while poolSelected.Resize():" + err.Error())
 				}
 			}else {
+				//pools created by TASK_QUEUE_MAX_POOL limit
 				for iter, pool := range tq.pools {
 					if (pool == nil) {
 						//need a clone's pointer
@@ -234,6 +245,10 @@ func (tq *TaskQueue) publish() {
 				//TODO if send failed, can add a sending list, can do with finish send result.
 				tq.Pop()
 
+				//free channel buf
+				if len(tq.poolFinishChannel) > 1 {
+					<-tq.poolFinishChannel
+				}
 			}else {
 				//read notify
 				<-tq.poolFinishChannel
