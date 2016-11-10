@@ -1,6 +1,10 @@
 # GoPush
 
     message pushing service.
+    
+# Run
+
+    ./bin/gopush apns
 
 
 ## TODO
