@@ -23,9 +23,11 @@ type Task struct {
 type TaskQueue struct {
 	server            Server
 
+	//task queue waiting for processing.
 	tasks             []*Task
 	taskChangeChannel chan bool
 
+	//worker pool for finish queue work.
 	pools             []*Pool
 	poolFinishChannel chan int
 

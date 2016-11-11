@@ -1,0 +1,83 @@
+#以下突然停了没响应的任务
+2016/08/16 19:40:01.816914 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:40:01.834431 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:40:01.834536 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 19:45:01.523110 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:45:01.542672 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:45:01.542756 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 19:50:01.420621 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:50:01.435614 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:50:01.435714 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 19:55:01.229973 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:55:01.248119 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:55:01.248211 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:00:01.368856 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:00:01.395267 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:00:01.395357 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:00:02.858014 handler.go:39: Receive request:  map[title:[海蜜全球购] body:[【最后四小时】品质媲美MANSUR GAVRIEL，价格仅需十分之一，KC JAGG
+ER真皮水桶包，美国本土爆款，599元直邮。] custom:[{"payload":"haimi-1301"}] sound:[bingbong.aiff] queue:[]]
+2016/08/16 20:00:02.858156 handler.go:137: Resp: {"error":false,"message":"Sent:5467ebe6-0546-4b2d-8e02-a38c77ac8596 Position:26","code":0,"push-id":"54
+67ebe6-0546-4b2d-8e02-a38c77ac8596","position":26}
+2016/08/16 20:00:02.858256 queue_builder.go:48: Init DeviceQueue data from QueueSource: select PushID from sys_push_client where `Platform`='IOS' and `A
+ppName`="haimi" and `PushID`!='' and CreateTime>"2015-11-10 00:00:00" and LastUpdateTime>"2015-11-10 00:00:00" group by PushID
+---------------------------------------------
+2016/08/16 20:00:07.019487 queue_builder.go:86: Queue data build finish, devices pending to send: 110159
+---------------------------------------------
+2016/08/16 20:05:01.057829 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:05:01.082224 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:05:01.082350 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:10:01.999360 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:10:02.188027 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:10:02.188126 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:15:01.264433 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:15:01.287748 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:15:01.287833 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:20:01.037189 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:20:01.634977 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:20:01.635065 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:25:01.082288 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:25:01.101053 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:25:01.101153 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:30:01.695901 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:30:03.861245 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:30:03.861345 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:35:01.103999 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:35:01.122890 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:35:01.122987 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:40:01.297906 env.go:221: Found localip for boot: 10.10.1.8
+
+#以下是正常的任务
+2016/08/17 12:27:16.583464 server.go:33: Server http://10.10.1.8:9999 started...
+2016/08/17 12:28:19.438903 handler.go:39: Receive request:  map[title:[海蜜全球购] body:[明星都在戴得一顶MLB潮帽，韩国买手专柜现场为你搭配，现场更有红包放送，快戳海蜜视频直播~] custom:[{"payload":"haimi-1307"}] sound:[bingbong.aiff] deviceids:[efdd029e3e62ab46bf089bfe7084d3261471b6f9e0e4225f9851b4e5b8e7f57e]]
+2016/08/17 12:28:19.439809 handler.go:137: Resp: {"error":false,"message":"Sent:33949b15-5dc5-42a5-86ab-12250bc48986 Position:0","code":0,"push-id":"33949b15-5dc5-42a5-86ab-12250bc48986","position":0}
+2016/08/17 12:28:19.439809 queue_builder.go:72: Init DeviceQueue data from DeviceIDs parameter.
+---------------------------------------------
+2016/08/17 12:28:19.439935 queue_builder.go:86: Queue data build finish, devices pending to send: 1
+2016/08/17 12:28:19.439950 task.go:172: DeviceQueue status is init, will block q.queueChangeChannel for correct init workers...
+2016/08/17 12:28:19.439970 task.go:178: DeviceQueue status is pending, will break for init pool initiation.
+---------------------------------------------
+2016/08/17 12:28:19.447916 worker.go:68: pool_0_worker_0 started, wait for push task...
+2016/08/17 12:28:19.454861 pool.go:134: PoolSelected pool_0 with workers size:2 config: 2
+2016/08/17 12:28:19.455010 pool.go:185: pool_0Receive new push task: {"title":"海蜜全球购","body":"明星都在戴得一顶MLB潮帽，韩国买手专柜现场为你搭配，现场更有红包放送，快戳海蜜视频直播~","custom":{"payload":"haimi-1307"},"sound":"bingbong.aiff","uuid":"33949b15-5dc5-42a5-86ab-12250bc48986"}
+2016/08/17 12:28:19.455052 worker.go:101: pool_0_worker_1 started to Subscribe...
+2016/08/17 12:28:19.455052 worker.go:68: pool_0_worker_1 started, wait for push task...
+2016/08/17 12:28:19.455075 worker.go:101: pool_0_worker_0 started to Subscribe...
+2016/08/17 12:28:19.455072 queue.go:74: DeviceQueue status is pending, publish now...
+2016/08/17 12:28:19.455147 worker.go:148: pool_0_worker_0 #start# to push for DeviceToken: efdd029e3e62ab46bf089bfe7084d3261471b6f9e0e4225f9851b4e5b8e7f57e
+2016/08/17 12:28:22.783439 worker.go:163: pool_0_worker_0 sent #success#: efdd029e3e62ab46bf089bfe7084d3261471b6f9e0e4225f9851b4e5b8e7f57e -> 33949b15-5dc5-42a5-86ab-12250bc48986
+
+#等待机制可以正常工作
+2016/08/15 10:36:17.756518 handler.go:137: Resp: {"error":false,"message":"Sent:0235e9cd-cb67-4c9f-8ddb-89c3a84ae9f1 Position:0","code":0,"push-id":"023
+5e9cd-cb67-4c9f-8ddb-89c3a84ae9f1","position":0}
+2016/08/15 10:36:17.756610 task.go:172: DeviceQueue status is init, will block q.queueChangeChannel for correct init workers...
+2016/08/15 10:36:17.756662 queue_builder.go:48: Init DeviceQueue data from QueueSource: select PushID from sys_push_client where `Platform`='IOS' and `A
+ppName`="haimi" and `PushID`!='' and CreateTime>"2015-11-10 00:00:00" and LastUpdateTime>"2015-11-10 00:00:00" group by PushID
+2016/08/15 10:36:22.186706 queue_builder.go:86: Queue data build finish, devices pending to send: 110019
+2016/08/15 10:36:22.186738 task.go:178: DeviceQueue status is pending, will break for init pool initiation.
+2016/08/15 10:36:22.186923 worker.go:68: pool_0_worker_2 started, wait for push task...
+2016/08/15 10:36:22.186938 worker.go:68: pool_0_worker_3 started, wait for push task...
+2016/08/15 10:36:22.186960 worker.go:68: pool_0_worker_4 started, wait for push task...
+2016/08/15 10:36:22.187087 worker.go:68: pool_0_worker_5 started, wait for push task...
+2016/08/15 10:36:22.187100 worker.go:68: pool_0_worker_7 started, wait for push task...
+2016/08/15 10:36:22.187107 worker.go:68: pool_0_worker_6 started, wait for push task...
+2016/08/15 10:36:22.187115 worker.go:68: pool_0_worker_8 started, wait for push task...
