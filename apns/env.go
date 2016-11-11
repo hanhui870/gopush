@@ -16,15 +16,16 @@ import (
 type EnvInfo struct {
 	cluster.BaseInfo
 
-	CertPath     string
-	CertPassword string
-	CertENV string
+	CertPath          string
+	CertPassword      string
+	CertENV           string
+	CertTopic         string
 
-	PoolConfig   *lib.PoolConfig
+	PoolConfig        *lib.PoolConfig
 
 	QueueSourceConfig *lib.QueueSourceConfig
 
-	WorkerPool *lib.WorkerPool
+	WorkerPool        *lib.WorkerPool
 }
 
 func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
@@ -39,7 +40,13 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 	// parse base info
 	env.ParseConfigFile(sec, c)
 
-	keyNow := "cert.path"
+	keyNow := "cert.env"
+	env.CertENV = config.GetValueString(keyNow, sec, c)
+	if env.CertENV == "" {
+		log.Fatalln("Config of " + keyNow + " is empty.")
+	}
+
+	keyNow = "cert.path"
 	env.CertPath = config.GetValueString(keyNow, sec, c)
 	if env.CertPath == "" {
 		log.Fatalln("Config of " + keyNow + " is empty.")
@@ -51,9 +58,9 @@ func NewEnvInfo(iniobj *ini.File, c *cli.Context) *EnvInfo {
 		log.Fatalln("Config of " + keyNow + " is empty.")
 	}
 
-	keyNow = "cert.env"
-	env.CertENV = config.GetValueString(keyNow, sec, c)
-	if env.CertENV == "" {
+	keyNow = "cert.topic"
+	env.CertTopic = config.GetValueString(keyNow, sec, c)
+	if env.CertTopic == "" {
 		log.Fatalln("Config of " + keyNow + " is empty.")
 	}
 

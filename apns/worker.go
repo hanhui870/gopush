@@ -123,7 +123,7 @@ func (w *Worker) Push(msg lib.MessageInterface, Device string) (*lib.WorkerRespo
 	msgLocal.DeviceToken = Device
 	msgLocal.ApnsID = msg.GetUuid()
 	msgLocal.Priority = 10
-	msgLocal.Topic = ""
+	msgLocal.Topic = env.CertTopic
 	load := payload.NewPayload()
 
 	load.Badge(1)
