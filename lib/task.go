@@ -187,12 +187,13 @@ func (tq *TaskQueue) publish() {
 					<-task.list.queueChangeChannel
 
 					if task.list.status == DEVICE_QUEUE_STATUS_PENDING {
-						tq.server.GetEnv().GetLogger().Println("DeviceQueue status is " + task.list.status + ", will break for init pool initiation.")
 						//need to break loop
 						break
 					}
 				}
 			}
+
+			tq.server.GetEnv().GetLogger().Println("DeviceQueue status is " + task.list.status + ", begin pool initiation.")
 
 			//select pool or create
 			//spare pool -> create pool -> wait
