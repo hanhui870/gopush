@@ -1,4 +1,33 @@
 #以下突然停了没响应的任务
+
+2016/08/16 19:40:01.834431 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:40:01.834536 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 19:45:01.523110 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:45:01.542672 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:45:01.542756 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 19:50:01.420621 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:50:01.435614 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:50:01.435714 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 19:55:01.229973 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 19:55:01.248119 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 19:55:01.248211 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:00:01.368856 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:00:01.395267 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:00:01.395357 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:00:02.858014 handler.go:39: Receive request:  map[title:[海蜜全球购] body:[【最后四小时】品质媲美MANSUR GAVRIEL，价格仅需十分之一，KC JAGGE
+R真皮水桶包，美国本土爆款，599元直邮。] custom:[{"payload":"haimi-1301"}] sound:[bingbong.aiff] queue:[]]
+2016/08/16 20:00:02.858156 handler.go:137: Resp: {"error":false,"message":"Sent:5467ebe6-0546-4b2d-8e02-a38c77ac8596 Position:26","code":0,"push-id":"546
+7ebe6-0546-4b2d-8e02-a38c77ac8596","position":26}
+2016/08/16 20:00:02.858256 queue_builder.go:48: Init DeviceQueue data from QueueSource: select PushID from sys_push_client where `Platform`='IOS' and `Ap
+pName`="haimi" and `PushID`!='' and CreateTime>"2015-11-10 00:00:00" and LastUpdateTime>"2015-11-10 00:00:00" group by PushID
+2016/08/16 20:00:07.019487 queue_builder.go:86: Queue data build finish, devices pending to send: 110159
+2016/08/16 20:05:01.057829 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:05:01.082224 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:05:01.082350 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+2016/08/16 20:10:01.999360 env.go:221: Found localip for boot: 10.10.1.8
+2016/08/16 20:10:02.188027 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
+2016/08/16 20:10:02.188126 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
+
 2016/08/16 19:40:01.816914 env.go:221: Found localip for boot: 10.10.1.8
 2016/08/16 19:40:01.834431 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
 2016/08/16 19:40:01.834536 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
@@ -45,6 +74,20 @@ ppName`="haimi" and `PushID`!='' and CreateTime>"2015-11-10 00:00:00" and LastUp
 2016/08/16 20:35:01.122890 env.go:242: Read and check uuid: /home/Bruce/server/gopush-1.0.0/runtime/pid/apns.uuid
 2016/08/16 20:35:01.122987 env.go:266: Fetch uuid of server Success: 6e8d8a67-5aea-4919-91d5-80e2e528d6b0
 2016/08/16 20:40:01.297906 env.go:221: Found localip for boot: 10.10.1.8
+
+都到pool_4了。
+2016/08/15 20:30:48.680383 pool.go:134: PoolSelected pool_0 with workers size:20 config: 20
+2016/08/15 20:30:48.679954 worker.go:101: pool_3_worker_5 started to Subscribe...
+2016/08/15 20:30:48.680468 pool.go:185: pool_4Receive new push task: {"title":"海蜜全球购","body":"感觉LV包太贵，不如来这看看！10元能中一个LV！真有这么神
+奇？！邀请好友一起参与，还能获得免费夺“包”机会！快戳~","custom":{"payload":"haimi-1257"},"sound":"bingbong.aiff","uuid":"076b93cc-56d4-4401-8a25-7675b48f
+7a7d"}
+2016/08/15 20:30:48.680191 worker.go:101: pool_2_worker_8 started to Subscribe...
+2016/08/15 20:30:48.680177 worker.go:148: pool_3_worker_4 #start# to push for DeviceToken: 7d56b442c2eed8b652351259d457aea23a9de849c9708ffae34310ac02086b
+af
+2016/08/15 20:30:48.680531 worker.go:101: pool_4_worker_7 started to Subscribe...
+2016/08/15 20:30:48.680543 worker.go:101: pool_4_worker_19 started to Subscribe...
+2016/08/15 20:30:48.680563 worker.go:101: pool_4_worker_3 started to Subscribe...
+2016/08/15 20:30:48.680210 worker.go:148: pool_3_worker_0 #start# to push for DeviceToken: 79f8bb23ba9
 
 #以下是正常的任务
 2016/08/17 12:27:16.583464 server.go:33: Server http://10.10.1.8:9999 started...

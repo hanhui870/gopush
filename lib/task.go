@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"time"
 )
 
 const (
@@ -249,13 +250,13 @@ func (tq *TaskQueue) publish() {
 				tq.Pop()
 
 				//free channel buf
-				if len(tq.poolFinishChannel) > 1 {
+				if len(tq.poolFinishChannel) >= 1 {
 					<-tq.poolFinishChannel
 				}
-			}else {
-				//read notify
-				<-tq.poolFinishChannel
 			}
+
+			//sleep and wait another loop
+			time.Sleep(time.Second);
 		}
 	}
 }
