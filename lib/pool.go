@@ -182,7 +182,7 @@ func (p *Pool) Send(task *Task, finish chan int) {
 		p.Env.GetLogger().Println(p.GetPoolName() + " msg.MarshalJSON() found error:", err)
 		return
 	}
-	p.Env.GetLogger().Println(p.GetPoolName() + "Receive new push task: " + string(con))
+	p.Env.GetLogger().Println(p.GetPoolName() + " receive new push task: " + string(con))
 
 	p.sendWg.Add(1)
 	// Queue data publish
