@@ -163,19 +163,20 @@ func (tq *TaskQueue) getSparePool() (*Pool) {
 
 //publish goroutine
 //
-//tq.taskChangeChannel capacity issue:
+//channel push and pop need to be consist.
 func (tq *TaskQueue) publish() {
 	for {
 		task, err := tq.Read()
 		if err != nil {
 			tq.server.GetEnv().GetLogger().Println("TaskQueue is empty, wait for taskChangeChannel...")
-			// empty
+			// empty, read the first
 			<-tq.taskChangeChannel
 
 			continue
 		}else {
 			//free channel buf
-			if len(tq.taskChangeChannel) > 1 {
+			if len(tq.taskChangeChannel) >= 1 {
+				//consume when len >=1
 				<-tq.taskChangeChannel
 			}
 
