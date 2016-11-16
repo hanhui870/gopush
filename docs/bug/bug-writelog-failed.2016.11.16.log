@@ -1,0 +1,6 @@
+#发送日志 发送成功也没有数据
+-rw-r----- 1 root root  10403357 11月  1 20:04 pool_ok.2016-11-01.log
+-rw-r----- 1 root root  10458636 11月  2 20:06 pool_ok.2016-11-02.log
+-rw-r----- 1 root root  10384877 11月  3 20:16 pool_ok.2016-11-03.log
+-rw-r----- 1 root root       703 11月 15 18:59 pool_ok.2016-11-15.log
+-rw-r----- 1 root root         0 11月 16 10:16 pool_ok.2016-11-16.log
