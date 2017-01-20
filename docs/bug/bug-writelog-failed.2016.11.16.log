@@ -4,3 +4,5 @@
 -rw-r----- 1 root root  10384877 11月  3 20:16 pool_ok.2016-11-03.log
 -rw-r----- 1 root root       703 11月 15 18:59 pool_ok.2016-11-15.log
 -rw-r----- 1 root root         0 11月 16 10:16 pool_ok.2016-11-16.log
+
+#11.15 晚上推送就没有写入,应该不是,rotate机制导致的问题。11.16也能正常的rotate。
